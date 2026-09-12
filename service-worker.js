@@ -1,10 +1,10 @@
 /**
  * ==========================================================================
- * DUNES PARFUMS — Service Worker para GitHub Pages & Modo Offline
+ * GL EXPRESS — Service Worker para Modo Offline & PWA
  * ==========================================================================
  */
 
-const CACHE_NAME = 'dunes-parfums-v2.4';
+const CACHE_NAME = 'glexpress-mayorista-v3.0';
 
 // Lista de activos estáticos con rutas relativas compatibles con GitHub Pages
 const STATIC_ASSETS = [
@@ -12,7 +12,6 @@ const STATIC_ASSETS = [
   './index.html',
   './style.css',
   './app.js',
-  './js/calculator.js',
   './manifest.json',
   './favicon.ico',
   './assets/favicon.ico',
@@ -21,17 +20,16 @@ const STATIC_ASSETS = [
   './assets/icon-512.png',
   './assets/icon-maskable-192.png',
   './assets/icon-maskable-512.png',
-  './assets/apple-touch-icon.png',
-  './assets/logocotizador.png'
+  './assets/apple-touch-icon.png'
 ];
 
 // Instalación: Precarga de recursos en la caché
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[DUNES SW] Precaching de activos para GitHub Pages');
+      console.log('[GL EXPRESS SW] Precaching de activos');
       return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.warn('[DUNES SW] Fallo en precaching de algún recurso:', err);
+        console.warn('[GL EXPRESS SW] Fallo en precaching de algún recurso:', err);
       });
     }).then(() => self.skipWaiting())
   );
@@ -44,7 +42,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
-            console.log('[DUNES SW] Limpiando caché anterior:', key);
+            console.log('[GL EXPRESS SW] Limpiando caché anterior:', key);
             return caches.delete(key);
           }
         })
@@ -60,11 +58,9 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Retornar recurso cacheado inmediatamente
         return cachedResponse;
       }
 
-      // Si no está en caché, solicitar por red
       return fetch(event.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
           const responseClone = networkResponse.clone();
@@ -74,7 +70,6 @@ self.addEventListener('fetch', (event) => {
         }
         return networkResponse;
       }).catch(() => {
-        // En caso de estar sin internet y navegar a una página
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }

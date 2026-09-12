@@ -1,7 +1,7 @@
 {
-  "name": "DUNES PARFUMS",
-  "short_name": "DUNES",
-  "description": "Cotizador profesional de perfumes USA a Perú",
+  "name": "GL EXPRESS MAYORISTA",
+  "short_name": "GL EXPRESS",
+  "description": "Catálogo exclusivo para clientes mayoristas de perfumería",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

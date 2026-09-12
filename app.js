@@ -1,129 +1,150 @@
 /**
  * ==========================================================================
- * DUNES PARFUMS — Controlador Principal de la Aplicación
- * Versión Mejorada: Memoria Inteligente, Nombre Dinámico, Configuración Base
- * y Persistencia Total PWA / Offline
+ * GL EXPRESS — Plataforma Oficial del Catálogo Mayorista
+ * Versión Exclusiva Mayorista 3.0
+ * 
+ * Reglas de Negocio:
+ * 1. Lee únicamente la pestaña MAYORISTA (gid=2013926010).
+ * 2. Datos visibles: Imagen, Producto, Precio USA ($), PUESTO EN PERÚ (S/).
+ * 3. Columna J ("Costo Perú") se muestra estrictamente como "PUESTO EN PERÚ".
+ * 4. Oculta al cliente: Cantidad, Peso KG, Flete, Reempaque, TC, Ganancias.
+ * 5. Carrito como generador de pedido estructurado para WhatsApp.
  * ==========================================================================
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Claves de Almacenamiento Local
+  // Claves de Almacenamiento Local (Aisladas para GL EXPRESS)
   const STORAGE_KEYS = {
-    HISTORY: 'dunes_cotizaciones_v1',
-    BASE_CONFIG: 'dunes_config_base_v1',
-    LAST_INPUTS: 'dunes_last_inputs_v1',
-    SHEETS_URL: 'dunes_google_sheets_url_v1',
-    CATALOGO_CACHE: 'dunes_catalogo_cache_v2',
-    CATALOGO_LAST_SYNC: 'dunes_catalogo_last_sync_v1'
+    SHEETS_URL: 'glexpress_google_sheets_url_v1',
+    CATALOGO_CACHE: 'glexpress_catalogo_cache_v1',
+    CATALOGO_LAST_SYNC: 'glexpress_catalogo_last_sync_v1',
+    CARRITO: 'glexpress_carrito_v1',
+    CLIENTE_NOMBRE: 'glexpress_cliente_nombre_v1'
   };
 
-  // URL del Google Sheets público oficial maestro de DUNES PARFUMS
-  const DEFAULT_SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSMxWTEsUiAmYSnu8ra29ku79UTtObn2EnphEEabBODeDZDdXUVcHqI85RnXSvSHBuRthVUlbsWnCy_/pub?output=csv';
+  // URL del Google Sheets público oficial maestro - Pestaña MAYORISTA (gid=2013926010)
+  const DEFAULT_SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSMxWTEsUiAmYSnu8ra29ku79UTtObn2EnphEEabBODeDZDdXUVcHqI85RnXSvSHBuRthVUlbsWnCy_/pub?gid=2013926010&single=true&output=csv';
 
-  // Valores de Fábrica Iniciales (DUNES PARFUMS)
-  // La capacidad de la caja es fija por negocio: siempre 4 perfumes
-  const FACTORY_DEFAULTS = {
-    cantidad: 1,
-    peso: 0.6,
-    envioKg: 9.50,
-    costoCaja: 4.00,    // Precio reempaque por caja (4 perfumes) ($)
-    reempaque: 1.00,    // Costo equivalente por perfume ($) (4.00 ÷ 4 = 1.00)
-    tc: 3.40,
-    extras: 15.00
-  };
+  // Catálogo base de respaldo offline para mayoristas
+  const CATALOGO_DEFAULT = [
+    {
+      id: 'gl-1',
+      producto: '9 Am Dive 3.4 Oz Edp Unisex',
+      precioUSA: 19.71,
+      puestoPeru: 90.00,
+      categoria: 'Árabes',
+      genero: 'Unisex',
+      imagen: '',
+      estadoCatalogo: 'Disponible',
+      esAgotado: false
+    },
+    {
+      id: 'gl-2',
+      producto: 'Club de Nuit Intense Man EDT 105ml',
+      precioUSA: 28.00,
+      puestoPeru: 115.00,
+      categoria: 'Árabes',
+      genero: 'Hombre',
+      imagen: '',
+      estadoCatalogo: 'Disponible',
+      esAgotado: false
+    },
+    {
+      id: 'gl-3',
+      producto: 'Khamrah Lattafa EDP 100ml',
+      precioUSA: 25.00,
+      puestoPeru: 112.50,
+      categoria: 'Árabes',
+      genero: 'Unisex',
+      imagen: '',
+      estadoCatalogo: 'Disponible',
+      esAgotado: false
+    },
+    {
+      id: 'gl-4',
+      producto: 'Dior Sauvage EDT 100ml',
+      precioUSA: 19.95,
+      puestoPeru: 86.50,
+      categoria: 'Diseñador',
+      genero: 'Hombre',
+      imagen: '',
+      estadoCatalogo: 'Disponible',
+      esAgotado: false
+    },
+    {
+      id: 'gl-5',
+      producto: 'Bleu de Chanel EDP 100ml',
+      precioUSA: 115.00,
+      puestoPeru: 415.50,
+      categoria: 'Diseñador',
+      genero: 'Hombre',
+      imagen: '',
+      estadoCatalogo: 'Disponible',
+      esAgotado: false
+    },
+    {
+      id: 'gl-6',
+      producto: 'Versace Eros Flame EDP 100ml',
+      precioUSA: 58.00,
+      puestoPeru: 220.00,
+      categoria: 'Diseñador',
+      genero: 'Hombre',
+      imagen: '',
+      estadoCatalogo: 'Disponible',
+      esAgotado: false
+    },
+    {
+      id: 'gl-7',
+      producto: 'Afnan 9PM EDP 100ml',
+      precioUSA: 26.50,
+      puestoPeru: 114.50,
+      categoria: 'Árabes',
+      genero: 'Hombre',
+      imagen: '',
+      estadoCatalogo: 'Disponible',
+      esAgotado: false
+    },
+    {
+      id: 'gl-8',
+      producto: 'Yara Lattafa EDP 100ml',
+      precioUSA: 24.00,
+      puestoPeru: 108.50,
+      categoria: 'Árabes',
+      genero: 'Mujer',
+      imagen: '',
+      estadoCatalogo: 'Disponible',
+      esAgotado: false
+    },
+    {
+      id: 'gl-9',
+      producto: 'Good Girl Carolina Herrera EDP 80ml',
+      precioUSA: 89.00,
+      puestoPeru: 325.00,
+      categoria: 'Diseñador',
+      genero: 'Mujer',
+      imagen: '',
+      estadoCatalogo: 'No disponible',
+      esAgotado: true
+    }
+  ];
 
-  // Referencias a los inputs del formulario
-  const inputs = {
-    producto: document.getElementById('producto'),
-    cantidad: document.getElementById('cantidad'),
-    precioUSA: document.getElementById('precioUSA'),
-    peso: document.getElementById('peso'),
-    envioKg: document.getElementById('envioKg'),
-    reempaque: document.getElementById('reempaque'),
-    tc: document.getElementById('tc'),
-    extras: document.getElementById('extras'),
-    venta: document.getElementById('venta')
-  };
+  // Reglas de negocio y configuración mayorista
+  const MIN_UNIDADES_MAYORISTA = 6;
+  const WHATSAPP_NUMERO = '51962247719';
 
-  // Referencias a inputs de Configuración de Costos
-  const configInputs = {
-    peso: document.getElementById('cfg-peso'),
-    envioKg: document.getElementById('cfg-envioKg'),
-    costoCaja: document.getElementById('cfg-costoCaja'),
-    reempaque: document.getElementById('cfg-reempaque'),
-    tc: document.getElementById('cfg-tc'),
-    extras: document.getElementById('cfg-extras')
-  };
+  // Estado en memoria
+  let catalogoProductos = [];
+  let carrito = [];
+  let localCardQuantities = {}; // { [productId]: number }
+  let catalogoCargando = false;
+  let catalogoImageObserver = null;
+  let filtroCategoriaActivo = 'todos';
+  let filtroGeneroActivo = 'todos';
+  let filtroEstadoActivo = 'todos';
 
-  // Referencias a elementos dinámicos de nombres y alertas
-  const labels = {
-    nombreCosto: document.getElementById('res-nombre-costo'),
-    nombreGanancia: document.getElementById('res-nombre-ganancia'),
-    alertCosto: document.getElementById('alert-costo'),
-    alertGanancia: document.getElementById('alert-ganancia'),
-    boxBreakdown: document.getElementById('box-costo-breakdown'),
-    boxGananciaGrid: document.getElementById('box-ganancia-grid'),
-    boxMargenContainer: document.getElementById('box-margen-container')
-  };
-
-  // Referencias a elementos de resultados
-  const outputs = {
-    totalUSA: document.getElementById('res-total-usa'),
-    flete: document.getElementById('res-flete'),
-    reempaque: document.getElementById('res-reempaque'),
-    totalUSD: document.getElementById('res-total-usd'),
-    costoPeru: document.getElementById('res-costo-peru'),
-    costoTotalSoles: document.getElementById('res-costo-total-soles'),
-    gananciaUnidad: document.getElementById('res-ganancia-unidad'),
-    gananciaTotal: document.getElementById('res-ganancia-total'),
-    margen: document.getElementById('res-margen'),
-    margenBar: document.getElementById('margen-bar-fill'),
-    wrapGananciaUnidad: document.getElementById('wrap-ganancia-unidad'),
-    wrapGananciaTotal: document.getElementById('wrap-ganancia-total')
-  };
-
-  // Referencias a botones principales
-  const btnCalcular = document.getElementById('btn-calcular');
-  const btnGuardar = document.getElementById('btn-guardar');
-  const btnNuevo = document.getElementById('btn-nuevo');
-  const btnLimpiar = document.getElementById('btn-limpiar');
-  const btnBorrarHistorial = document.getElementById('btn-borrar-historial');
-
-  // Referencias de sección Configuración (Modal)
-  const btnAbrirConfig = document.getElementById('btn-abrir-config');
-  const btnCerrarConfig = document.getElementById('btn-cerrar-config');
-  const modalConfig = document.getElementById('modal-configuracion');
-  const btnGuardarConfig = document.getElementById('btn-guardar-config');
-  const btnRestaurarFabrica = document.getElementById('btn-restaurar-fabrica');
-
-  // Referencias de Historial
-  const historialLista = document.getElementById('historial-lista');
-  const historialContador = document.getElementById('historial-contador');
-  const historialActions = document.getElementById('historial-actions');
-
-  // Referencias de Modal
-  const modalDetalle = document.getElementById('modal-detalle');
-  const modalProducto = document.getElementById('modal-producto');
-  const modalFecha = document.getElementById('modal-fecha');
-  const modalContenido = document.getElementById('modal-contenido');
-  const btnCerrarModal = document.getElementById('btn-cerrar-modal');
-  const btnCerrarModalBottom = document.getElementById('btn-cerrar-modal-bottom');
-  const btnCargarModal = document.getElementById('btn-cargar-modal');
-
-  // Contenedor de Toast y PWA Status
-  const toastContainer = document.getElementById('toast-container');
-  const pwaStatus = document.getElementById('pwa-status');
-
-  // Referencias de Navegación y Vistas
-  const navTabs = document.querySelectorAll('.app-nav-tabs .nav-tab');
-  const views = {
-    cotizador: document.getElementById('vista-cotizador'),
-    catalogo: document.getElementById('vista-catalogo'),
-    cotizaciones: document.getElementById('vista-cotizaciones')
-  };
-
-  // Referencias del Módulo Catálogo
-  const catalogoElements = {
+  // Referencias a elementos del DOM
+  const elements = {
+    // Catálogo
     busqueda: document.getElementById('catalogo-busqueda'),
     btnLimpiar: document.getElementById('catalogo-btn-limpiar-busqueda'),
     contador: document.getElementById('catalogo-contador'),
@@ -134,721 +155,57 @@ document.addEventListener('DOMContentLoaded', () => {
     emptyDesc: document.getElementById('catalogo-empty-desc'),
     btnSync: document.getElementById('btn-sincronizar-catalogo'),
     syncDot: document.getElementById('catalogo-sync-dot'),
-    syncText: document.getElementById('catalogo-sync-text')
-  };
+    syncText: document.getElementById('catalogo-sync-text'),
 
-  // Estado en memoria
-  let currentCalculations = null;
-  let currentModalItem = null;
-  let catalogoProductos = [];
-  let catalogoCargando = false;
-  let catalogoImageObserver = null;
-  let filtroCategoriaActivo = 'todos';
-  let filtroGeneroActivo = 'todos';
-  let filtroEstadoActivo = 'todos';
-  let vistaActiva = 'cotizador';
+    // Filtros
+    btnToggleFiltros: document.getElementById('btn-toggle-filtros'),
+    panelFiltros: document.getElementById('catalog-filters-collapsible'),
+    toggleFiltrosArrow: document.getElementById('toggle-filtros-arrow'),
+    toggleFiltrosDot: document.getElementById('toggle-filtros-dot'),
+
+    // Header y Carrito Flotante
+    headerCartBtn: document.getElementById('header-cart-btn'),
+    headerCartCount: document.getElementById('header-cart-count'),
+    floatingCartBar: document.getElementById('floating-cart-bar'),
+    btnAbrirCarritoFlotante: document.getElementById('btn-abrir-carrito-flotante'),
+    floatingCartCount: document.getElementById('floating-cart-count'),
+    floatingCartTotal: document.getElementById('floating-cart-total'),
+
+    // Modal Carrito
+    modalCarrito: document.getElementById('modal-carrito'),
+    btnCerrarCarrito: document.getElementById('btn-cerrar-carrito'),
+    btnSeguirComprando: document.getElementById('btn-seguir-comprando'),
+    btnVaciarCarrito: document.getElementById('btn-vaciar-carrito'),
+    btnEnviarWhatsapp: document.getElementById('btn-enviar-whatsapp'),
+    carritoItemsLista: document.getElementById('carrito-lista-items'),
+    carritoVacio: document.getElementById('carrito-vacio'),
+    carritoResumenBox: document.getElementById('carrito-resumen-box'),
+    cartTotalUnidades: document.getElementById('cart-total-unidades'),
+    cartTotalSoles: document.getElementById('cart-total-soles'),
+    cartStockWarning: document.getElementById('cart-stock-warning'),
+    cartMinWarning: document.getElementById('cart-min-warning'),
+    cartMinRemainingText: document.getElementById('cart-min-remaining-text'),
+    inputClienteNombre: document.getElementById('input-cliente-nombre'),
+
+    // Modal Confirmar Vaciar
+    modalConfirmarVaciar: document.getElementById('modal-confirmar-vaciar'),
+    btnCerrarConfirmarVaciar: document.getElementById('btn-cerrar-confirmar-vaciar'),
+    btnCancelarVaciar: document.getElementById('btn-cancelar-vaciar'),
+    btnConfirmarVaciar: document.getElementById('btn-confirmar-vaciar'),
+
+    // Toast y Estado PWA
+    toastContainer: document.getElementById('toast-container'),
+    pwaStatus: document.getElementById('pwa-status')
+  };
 
   // Formateadores
   const formatUSD = (num) => `$ ${Number(num || 0).toFixed(2)}`;
   const formatPEN = (num) => `S/ ${Number(num || 0).toFixed(2)}`;
-  const formatNum = (num) => Number(num || 0).toFixed(2);
 
-  /**
-   * ========================================================================
-   * GESTIÓN DE MEMORIA Y VALORES PREDETERMINADOS INTELIGENTES
-   * ========================================================================
-   */
-
-  /**
-   * Obtiene la configuración base activa (Guardada o Fábrica)
-   */
-  function obtenerConfigBase() {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.BASE_CONFIG);
-      if (saved) {
-        const merged = { ...FACTORY_DEFAULTS, ...JSON.parse(saved) };
-        const costoCaja = (merged.costoCaja !== undefined && merged.costoCaja !== null && merged.costoCaja !== '')
-          ? Math.max(0, parseFloat(merged.costoCaja) >= 0 ? parseFloat(merged.costoCaja) : 0)
-          : FACTORY_DEFAULTS.costoCaja;
-        merged.costoCaja = costoCaja;
-        // Costo reempaque por perfume = Precio reempaque caja ÷ 4
-        merged.reempaque = parseFloat((costoCaja / 4).toFixed(2));
-        return merged;
-      }
-    } catch (e) {
-      console.warn('Error al leer configuración base', e);
-    }
-    return { ...FACTORY_DEFAULTS };
-  }
-
-  /**
-   * Obtiene los últimos valores utilizados por el usuario
-   */
-  function obtenerUltimosValores() {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.LAST_INPUTS);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.warn('Error al leer últimos valores', e);
-    }
-    return null;
-  }
-
-  /**
-   * Guarda automáticamente los valores cambiados en tiempo real
-   */
-  function autoGuardarValoresUsuario() {
-    try {
-      const datosParaGuardar = {
-        peso: Math.max(0, parseFloat(inputs.peso.value) || 0),
-        envioKg: Math.max(0, parseFloat(inputs.envioKg.value) || 0),
-        reempaque: Math.max(0, parseFloat(inputs.reempaque.value) || 0),
-        tc: Math.max(0, parseFloat(inputs.tc.value) || 0),
-        extras: Math.max(0, parseFloat(inputs.extras.value) || 0)
-      };
-      localStorage.setItem(STORAGE_KEYS.LAST_INPUTS, JSON.stringify(datosParaGuardar));
-    } catch (e) {
-      console.warn('Error al autoguardar valores', e);
-    }
-  }
-
-  /**
-   * Inicializa los campos de formulario según la regla de prioridad:
-   * 1. Últimos valores usados
-   * 2. Configuración base guardada
-   * 3. Valores de fábrica DUNES
-   */
-  function cargarValoresIniciales() {
-    const configBase = obtenerConfigBase();
-    const ultimosValores = obtenerUltimosValores();
-
-    // Determinar valores efectivos para el cotizador
-    const valoresEfectivos = ultimosValores
-      ? { ...configBase, ...ultimosValores }
-      : configBase;
-
-    const costoReempaquePorPerfume = parseFloat(configBase.reempaque) || 1.00;
-
-    inputs.cantidad.value = 1;
-    inputs.peso.value = valoresEfectivos.peso;
-    inputs.envioKg.value = valoresEfectivos.envioKg;
-    
-    // Si el usuario tenía un reempaque manual modificado guardado, lo respetamos;
-    // si no, se calcula dinámicamente cantidad (1) × costo por perfume.
-    if (ultimosValores && ultimosValores.reempaque !== undefined && ultimosValores.reempaque !== null) {
-      inputs.reempaque.value = parseFloat(ultimosValores.reempaque).toFixed(2);
-    } else {
-      inputs.reempaque.value = (1 * costoReempaquePorPerfume).toFixed(2);
-    }
-
-    inputs.tc.value = valoresEfectivos.tc;
-    inputs.extras.value = valoresEfectivos.extras;
-
-    // Sincronizar inputs de la sección de Configuración Base
-    configInputs.peso.value = configBase.peso;
-    configInputs.envioKg.value = configBase.envioKg;
-    if (configInputs.costoCaja) configInputs.costoCaja.value = (configBase.costoCaja !== undefined ? configBase.costoCaja : 4.00).toFixed(2);
-    if (configInputs.reempaque) configInputs.reempaque.value = costoReempaquePorPerfume.toFixed(2);
-    configInputs.tc.value = configBase.tc;
-    configInputs.extras.value = configBase.extras;
-  }
-
-  /**
-   * ========================================================================
-   * SINCRONIZACIÓN DINÁMICA DEL NOMBRE DEL PERFUME
-   * ========================================================================
-   */
-  function sincronizarNombrePerfume() {
-    const nombre = inputs.producto.value.trim();
-    const textoMostrar = nombre ? nombre : 'Perfume no especificado';
-
-    if (labels.nombreCosto) {
-      labels.nombreCosto.textContent = textoMostrar;
-      labels.nombreCosto.style.color = nombre ? 'var(--gold-light)' : 'var(--text-muted)';
-    }
-
-    if (labels.nombreGanancia) {
-      labels.nombreGanancia.textContent = textoMostrar;
-      labels.nombreGanancia.style.color = nombre ? 'var(--gold-light)' : 'var(--text-muted)';
-    }
-  }
-
-  /**
-   * ========================================================================
-   * MOTOR DE CÁLCULO Y VALIDACIONES
-   * ========================================================================
-   */
-  function getFormValues() {
-    return {
-      producto: inputs.producto.value.trim(),
-      cantidad: Math.max(1, parseInt(inputs.cantidad.value, 10) || 1),
-      precioUSA: Math.max(0, parseFloat(inputs.precioUSA.value) || 0),
-      peso: Math.max(0, parseFloat(inputs.peso.value) || 0),
-      envioKg: Math.max(0, parseFloat(inputs.envioKg.value) || 0),
-      reempaque: Math.max(0, parseFloat(inputs.reempaque.value) || 0),
-      tc: Math.max(0, parseFloat(inputs.tc.value) || 0),
-      extras: Math.max(0, parseFloat(inputs.extras.value) || 0),
-      venta: Math.max(0, parseFloat(inputs.venta.value) || 0)
-    };
-  }
-
-  function ejecutarCalculo() {
-    sincronizarNombrePerfume();
-    autoGuardarValoresUsuario();
-
-    const vals = getFormValues();
-    const tienePrecioUSA = vals.precioUSA > 0;
-    const tienePrecioVenta = vals.venta > 0;
-
-    // Validación 1: Precio USA vacío o 0
-    if (!tienePrecioUSA) {
-      labels.alertCosto.style.display = 'block';
-      labels.boxBreakdown.style.opacity = '0.4';
-      labels.alertGanancia.style.display = 'block';
-      labels.alertGanancia.textContent = '⚠️ Ingresa el precio USA para calcular';
-      labels.boxGananciaGrid.style.opacity = '0.4';
-
-      outputs.totalUSA.textContent = '$ 0.00';
-      outputs.flete.textContent = '$ 0.00';
-      outputs.reempaque.textContent = '$ 0.00';
-      outputs.totalUSD.textContent = '$ 0.00';
-      outputs.costoPeru.textContent = '0.00';
-      outputs.costoTotalSoles.textContent = 'Total lote: S/ 0.00';
-      outputs.gananciaUnidad.textContent = '0.00';
-      outputs.gananciaTotal.textContent = '0.00';
-      outputs.margen.textContent = '0.0%';
-      outputs.margenBar.style.width = '0%';
-
-      currentCalculations = { ...vals, totalUSA: 0, flete: 0, reempaque: 0, totalEnvio: 0, precioTotalUSD: 0, precioTotalSoles: 0, costoUnidad: 0, gananciaUnidad: 0, gananciaTotal: 0, margen: 0 };
-      return currentCalculations;
-    }
-
-    // Si tiene Precio USA, calcular Costo Puesto en Perú
-    labels.alertCosto.style.display = 'none';
-    labels.boxBreakdown.style.opacity = '1';
-
-    // Ejecución con motor matemático certificado por pruebas unitarias
-    const res = window.calculateDunesQuotation(vals);
-    currentCalculations = { ...vals, ...res };
-
-    // Actualizar Tarjeta 1: Costo Puesto en Perú
-    outputs.totalUSA.textContent = formatUSD(res.totalUSA);
-    outputs.flete.textContent = formatUSD(res.flete);
-    outputs.reempaque.textContent = formatUSD(res.reempaque);
-    outputs.totalUSD.textContent = formatUSD(res.precioTotalUSD);
-    outputs.costoPeru.textContent = formatNum(res.costoUnidad);
-    outputs.costoTotalSoles.textContent = `Total lote: ${formatPEN(res.precioTotalSoles)}`;
-
-    // Validación 2: Precio de Venta
-    if (!tienePrecioVenta) {
-      labels.alertGanancia.style.display = 'block';
-      labels.alertGanancia.textContent = 'ℹ️ Ingresa el precio de venta para ver tu ganancia';
-      labels.boxGananciaGrid.style.opacity = '0.4';
-      labels.boxMargenContainer.style.opacity = '0.4';
-
-      outputs.gananciaUnidad.textContent = '0.00';
-      outputs.gananciaTotal.textContent = '0.00';
-      outputs.margen.textContent = '0.0%';
-      outputs.margenBar.style.width = '0%';
-    } else {
-      labels.alertGanancia.style.display = 'none';
-      labels.boxGananciaGrid.style.opacity = '1';
-      labels.boxMargenContainer.style.opacity = '1';
-
-      outputs.gananciaUnidad.textContent = formatNum(res.gananciaUnidad);
-      outputs.gananciaTotal.textContent = formatNum(res.gananciaTotal);
-      outputs.margen.textContent = `${res.margen.toFixed(1)}%`;
-
-      const esPositiva = res.gananciaUnidad >= 0;
-      outputs.wrapGananciaUnidad.className = `stat-value-wrap ${esPositiva ? 'positive' : 'negative'}`;
-      outputs.wrapGananciaTotal.className = `stat-value-wrap ${esPositiva ? 'positive' : 'negative'}`;
-
-      const margenClamped = Math.max(0, Math.min(100, res.margen));
-      outputs.margenBar.style.width = `${margenClamped}%`;
-      if (!esPositiva) {
-        outputs.margenBar.style.background = 'linear-gradient(90deg, #ef4444, #f87171)';
-        outputs.margen.style.color = '#ef4444';
-      } else {
-        outputs.margenBar.style.background = 'linear-gradient(90deg, #10b981, #34d399)';
-        outputs.margen.style.color = '#10b981';
-      }
-    }
-
-    return currentCalculations;
-  }
-
-  /**
-   * ========================================================================
-   * NOTIFICACIONES TOAST
-   * ========================================================================
-   */
-  function showToast(message, type = 'success') {
-    if (!toastContainer) return;
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `
-      <span class="toast-icon">${type === 'success' ? '✔' : 'ℹ'}</span>
-      <span class="toast-msg">${message}</span>
-    `;
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-      toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(-10px)';
-      setTimeout(() => toast.remove(), 300);
-    }, 3000);
-  }
-
-  /**
-   * ========================================================================
-   * HISTORIAL LOCAL (PERSISTENCIA Y DETALLE)
-   * ========================================================================
-   */
-  function obtenerHistorial() {
-    try {
-      const data = localStorage.getItem(STORAGE_KEYS.HISTORY);
-      return data ? JSON.parse(data) : [];
-    } catch (e) {
-      console.error('Error al leer historial', e);
-      return [];
-    }
-  }
-
-  function guardarHistorial(lista) {
-    try {
-      localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(lista));
-    } catch (e) {
-      console.error('Error al guardar historial', e);
-    }
-  }
-
-  function guardarCotizacionActual() {
-    const vals = getFormValues();
-
-    if (!vals.precioUSA || vals.precioUSA <= 0) {
-      showToast('Ingresa el precio USA para cotizar', 'info');
-      inputs.precioUSA.focus();
-      return;
-    }
-
-    const calc = ejecutarCalculo();
-    const nombre = calc.producto || 'Perfume Importado';
-
-    const ahora = new Date();
-    const fechaFormateada = ahora.toLocaleDateString('es-PE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    }) + ' ' + ahora.toLocaleTimeString('es-PE', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-
-    const nuevoItem = {
-      id: Date.now(),
-      fecha: fechaFormateada,
-      timestamp: ahora.getTime(),
-      ...calc,
-      producto: nombre
-    };
-
-    const historial = obtenerHistorial();
-    historial.unshift(nuevoItem);
-    guardarHistorial(historial);
-
-    renderizarHistorial();
-    showToast(`"${nombre}" guardado en historial`);
-  }
-
-  function renderizarHistorial() {
-    const historial = obtenerHistorial();
-    historialContador.textContent = `${historial.length} guardada${historial.length === 1 ? '' : 's'}`;
-
-    if (historial.length === 0) {
-      historialLista.innerHTML = `
-        <div class="empty-history">
-          <div class="empty-icon">🏷️</div>
-          <p>Aún no tienes cotizaciones guardadas.</p>
-          <small>Presiona "GUARDAR COTIZACIÓN" para archivarlas aquí.</small>
-        </div>
-      `;
-      historialActions.style.display = 'none';
-      return;
-    }
-
-    historialActions.style.display = 'block';
-    historialLista.innerHTML = '';
-
-    historial.forEach((item) => {
-      const card = document.createElement('div');
-      card.className = 'quote-card';
-      const esPositiva = (item.gananciaUnidad >= 0);
-
-      card.innerHTML = `
-        <div class="quote-card-header">
-          <div>
-            <h4 class="quote-card-title">🧴 ${escapeHTML(item.producto)}</h4>
-            <span class="quote-card-meta">📅 ${item.fecha}</span>
-          </div>
-          <span class="quote-badge-qty">${item.cantidad} ud${item.cantidad > 1 ? 's' : ''}</span>
-        </div>
-
-        <div class="quote-metrics-grid">
-          <div class="metric-item">
-            <span class="metric-lbl">Costo Perú</span>
-            <span class="metric-val">S/ ${formatNum(item.costoUnidad)}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-lbl">Venta</span>
-            <span class="metric-val">S/ ${formatNum(item.venta)}</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-lbl">Ganancia C/U</span>
-            <span class="metric-val ${esPositiva ? 'metric-profit' : ''}" style="${!esPositiva ? 'color:#ef4444;' : ''}">
-              S/ ${formatNum(item.gananciaUnidad)}
-            </span>
-          </div>
-        </div>
-
-        <div class="quote-card-footer">
-          <span class="quote-margin-badge" style="${!esPositiva ? 'background:rgba(239,68,68,0.15); color:#ef4444;' : ''}">
-            Margen: ${Number(item.margen || 0).toFixed(1)}%
-          </span>
-          <div class="quote-card-btns">
-            <button class="btn-card-action btn-ver-detalle" data-id="${item.id}" type="button">
-              🔍 Detalle
-            </button>
-            <button class="btn-card-action btn-card-delete btn-eliminar" data-id="${item.id}" type="button">
-              🗑️
-            </button>
-          </div>
-        </div>
-      `;
-
-      historialLista.appendChild(card);
-    });
-
-    historialLista.querySelectorAll('.btn-ver-detalle').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        const id = parseInt(e.currentTarget.getAttribute('data-id'), 10);
-        abrirModalDetalle(id);
-      });
-    });
-
-    historialLista.querySelectorAll('.btn-eliminar').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        const id = parseInt(e.currentTarget.getAttribute('data-id'), 10);
-        eliminarCotizacion(id);
-      });
-    });
-  }
-
-  function eliminarCotizacion(id) {
-    let historial = obtenerHistorial();
-    const item = historial.find((i) => i.id === id);
-    const nombre = item ? item.producto : 'Cotización';
-
-    historial = historial.filter((i) => i.id !== id);
-    guardarHistorial(historial);
-    renderizarHistorial();
-    showToast(`Eliminado: ${nombre}`, 'info');
-  }
-
-  function borrarTodoHistorial() {
-    if (confirm('¿Estás seguro de que deseas borrar todas las cotizaciones guardadas?')) {
-      localStorage.removeItem(STORAGE_KEYS.HISTORY);
-      renderizarHistorial();
-      showToast('Historial completo eliminado', 'info');
-    }
-  }
-
-  /**
-   * ========================================================================
-   * MODAL DE DETALLE COMPLETO
-   * ========================================================================
-   */
-  function abrirModalDetalle(id) {
-    const historial = obtenerHistorial();
-    const item = historial.find((i) => i.id === id);
-    if (!item) return;
-
-    currentModalItem = item;
-    modalProducto.textContent = `🧴 ${item.producto}`;
-    modalFecha.textContent = `Guardado: ${item.fecha}`;
-
-    const esPositiva = (item.gananciaUnidad >= 0);
-
-    modalContenido.innerHTML = `
-      <table class="detail-table">
-        <tbody>
-          <tr>
-            <td>Perfume:</td>
-            <td style="color:var(--gold-light);">${escapeHTML(item.producto)}</td>
-          </tr>
-          <tr>
-            <td>Cantidad importada:</td>
-            <td>${item.cantidad} unidad${item.cantidad > 1 ? 'es' : ''}</td>
-          </tr>
-          <tr>
-            <td>Precio unitario USA:</td>
-            <td>${formatUSD(item.precioUSA)}</td>
-          </tr>
-          <tr>
-            <td>Total Costo USA:</td>
-            <td>${formatUSD(item.totalUSA)}</td>
-          </tr>
-          <tr>
-            <td>Peso del perfume:</td>
-            <td>${item.peso} KG</td>
-          </tr>
-          <tr>
-            <td>Costo envío courier por KG:</td>
-            <td>${formatUSD(item.envioKg)}</td>
-          </tr>
-          <tr>
-            <td>Flete aéreo (${(item.peso * item.cantidad).toFixed(2)} KG total × Tarifa):</td>
-            <td>${formatUSD(item.flete)}</td>
-          </tr>
-          <tr>
-            <td>Reempaque courier:</td>
-            <td>${formatUSD(item.reempaque)}</td>
-          </tr>
-          <tr>
-            <td>Total Gasto Envío:</td>
-            <td>${formatUSD(item.totalEnvio)}</td>
-          </tr>
-          <tr style="border-top: 1px dashed rgba(212,175,55,0.3); font-weight:600;">
-            <td style="color:var(--gold-light);">Precio Total en USD:</td>
-            <td style="color:var(--gold-light);">${formatUSD(item.precioTotalUSD)}</td>
-          </tr>
-          <tr>
-            <td>Tipo de Cambio aplicado:</td>
-            <td>S/ ${formatNum(item.tc)}</td>
-          </tr>
-          <tr>
-            <td>Precio Total en Soles (Lote):</td>
-            <td>${formatPEN(item.precioTotalSoles)}</td>
-          </tr>
-          <tr style="background:rgba(212,175,55,0.08); font-weight:700;">
-            <td style="color:var(--gold-primary);">Costo puesto en Perú C/U:</td>
-            <td style="color:#fff; font-size:1rem;">${formatPEN(item.costoUnidad)}</td>
-          </tr>
-          <tr>
-            <td>Costos extras locales (delivery/caja):</td>
-            <td>${formatPEN(item.extras)}</td>
-          </tr>
-          <tr>
-            <td>Precio de venta público C/U:</td>
-            <td>${formatPEN(item.venta)}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="detail-hero-highlight" style="${!esPositiva ? 'background:rgba(239,68,68,0.1); border-color:rgba(239,68,68,0.3);' : ''}">
-        <div>
-          <span style="font-size:0.75rem; color:${esPositiva ? 'var(--emerald-profit)' : 'var(--crimson-loss)'}; text-transform:uppercase; font-weight:700; display:block;">
-            ${esPositiva ? 'Ganancia Neta por Unidad' : 'Pérdida por Unidad'}
-          </span>
-          <b style="font-size:1.45rem; color:#fff;">${formatPEN(item.gananciaUnidad)}</b>
-          <span style="font-size:0.75rem; color:var(--text-muted); display:block;">
-            Ganancia total lote: ${formatPEN(item.gananciaTotal)}
-          </span>
-        </div>
-        <div style="text-align:right;">
-          <span style="font-size:0.75rem; color:var(--text-secondary); display:block;">Margen:</span>
-          <b style="font-size:1.3rem; color:${esPositiva ? 'var(--emerald-profit)' : 'var(--crimson-loss)'};">
-            ${Number(item.margen || 0).toFixed(1)}%
-          </b>
-        </div>
-      </div>
-    `;
-
-    modalDetalle.classList.add('is-active');
-    modalDetalle.setAttribute('aria-hidden', 'false');
-  }
-
-  function cerrarModal() {
-    modalDetalle.classList.remove('is-active');
-    modalDetalle.setAttribute('aria-hidden', 'true');
-    currentModalItem = null;
-  }
-
-  function cargarItemEnFormulario() {
-    if (!currentModalItem) return;
-    inputs.producto.value = currentModalItem.producto || '';
-    inputs.cantidad.value = currentModalItem.cantidad || 1;
-    inputs.precioUSA.value = currentModalItem.precioUSA || '';
-    inputs.peso.value = currentModalItem.peso || 0.6;
-    inputs.envioKg.value = currentModalItem.envioKg || 9.50;
-    inputs.reempaque.value = currentModalItem.reempaque || 1.00;
-    inputs.tc.value = currentModalItem.tc || 3.40;
-    inputs.extras.value = currentModalItem.extras || 15.00;
-    inputs.venta.value = currentModalItem.venta || '';
-
-    ejecutarCalculo();
-    cerrarModal();
-
-    document.getElementById('seccion-formulario').scrollIntoView({ behavior: 'smooth' });
-    inputs.producto.focus();
-    showToast('Cotización cargada en el formulario');
-  }
-
-  /**
-   * ========================================================================
-   * BOTONES: NUEVA COTIZACIÓN Y LIMPIAR DATOS
-   * ========================================================================
-   */
-  function nuevaCotizacion() {
-    inputs.producto.value = '';
-    inputs.precioUSA.value = '';
-    inputs.venta.value = '';
-    inputs.cantidad.value = '1';
-
-    // Cargar la configuración base activa para este nuevo cálculo
-    const configBase = obtenerConfigBase();
-    const ultimos = obtenerUltimosValores() || configBase;
-    const costoPorPerfume = parseFloat(configBase.reempaque) || 1.00;
-
-    inputs.peso.value = ultimos.peso;
-    inputs.envioKg.value = ultimos.envioKg;
-    // En nueva cotización (cantidad = 1), reempaque automático = 1 × costo reempaque por perfume
-    inputs.reempaque.value = (1 * costoPorPerfume).toFixed(2);
-    inputs.tc.value = ultimos.tc;
-    inputs.extras.value = ultimos.extras;
-
-    ejecutarCalculo();
-
-    document.getElementById('seccion-formulario').scrollIntoView({ behavior: 'smooth' });
-    inputs.producto.focus();
-    showToast('Listo para nueva cotización');
-  }
-
-  function limpiarDatos() {
-    inputs.producto.value = '';
-    inputs.cantidad.value = '1';
-    inputs.precioUSA.value = '';
-    inputs.venta.value = '';
-
-    // Cargar la configuración base
-    const configBase = obtenerConfigBase();
-    const costoPorPerfume = parseFloat(configBase.reempaque) || 1.00;
-
-    inputs.peso.value = configBase.peso;
-    inputs.envioKg.value = configBase.envioKg;
-    inputs.reempaque.value = (1 * costoPorPerfume).toFixed(2);
-    inputs.tc.value = configBase.tc;
-    inputs.extras.value = configBase.extras;
-
-    // Actualizar memoria
-    autoGuardarValoresUsuario();
-    ejecutarCalculo();
-    showToast('Valores restaurados según configuración base', 'info');
-  }
-
-  /**
-   * ========================================================================
-   * SECCIÓN CONFIGURACIÓN DE COSTOS (MODAL & ACCIONES)
-   * ========================================================================
-   */
-  function abrirModalConfiguracion() {
-    if (!modalConfig) return;
-    const configBase = obtenerConfigBase();
-    configInputs.peso.value = configBase.peso;
-    configInputs.envioKg.value = configBase.envioKg;
-    const costoCaja = (configBase.costoCaja !== undefined ? configBase.costoCaja : 4.00);
-    if (configInputs.costoCaja) configInputs.costoCaja.value = parseFloat(costoCaja).toFixed(2);
-    
-    // Costo equivalente por perfume = Precio reempaque caja ÷ 4
-    const costoPorPerfume = parseFloat((costoCaja / 4).toFixed(2));
-    if (configInputs.reempaque) configInputs.reempaque.value = costoPorPerfume.toFixed(2);
-
-    configInputs.tc.value = configBase.tc;
-    configInputs.extras.value = configBase.extras;
-
-    modalConfig.classList.add('is-active');
-    modalConfig.setAttribute('aria-hidden', 'false');
-  }
-
-  function cerrarModalConfiguracion() {
-    if (!modalConfig) return;
-    modalConfig.classList.remove('is-active');
-    modalConfig.setAttribute('aria-hidden', 'true');
-  }
-
-  function actualizarCostoCalculadoModal() {
-    const caja = Math.max(0, parseFloat(configInputs.costoCaja ? configInputs.costoCaja.value : 4.00) || 0);
-    const porPerfume = caja / 4;
-    if (configInputs.reempaque) {
-      configInputs.reempaque.value = porPerfume.toFixed(2);
-    }
-  }
-
-  function guardarConfiguracionBase() {
-    const rawCaja = configInputs.costoCaja ? configInputs.costoCaja.value : '4.00';
-    const costoCaja = Math.max(0, parseFloat(rawCaja) >= 0 ? parseFloat(rawCaja) : 4.00);
-    const costoPorPerfume = parseFloat((costoCaja / 4).toFixed(2));
-
-    const nuevaConfig = {
-      peso: Math.max(0, parseFloat(configInputs.peso.value) || 0.6),
-      envioKg: Math.max(0, parseFloat(configInputs.envioKg.value) || 9.50),
-      costoCaja: costoCaja,
-      reempaque: costoPorPerfume, // Costo reempaque por perfume = Precio caja ÷ 4
-      tc: Math.max(0, parseFloat(configInputs.tc.value) || 3.40),
-      extras: Math.max(0, parseFloat(configInputs.extras.value) || 15.00)
-    };
-
-    localStorage.setItem(STORAGE_KEYS.BASE_CONFIG, JSON.stringify(nuevaConfig));
-
-    // Aplicar de inmediato al cotizador:
-    // Reempaque total = Cantidad de perfumes × costo reempaque por perfume
-    const cantActual = Math.max(1, parseInt(inputs.cantidad.value, 10) || 1);
-    inputs.peso.value = nuevaConfig.peso;
-    inputs.envioKg.value = nuevaConfig.envioKg;
-    inputs.reempaque.value = (cantActual * costoPorPerfume).toFixed(2);
-    inputs.tc.value = nuevaConfig.tc;
-    inputs.extras.value = nuevaConfig.extras;
-
-    autoGuardarValoresUsuario();
-    ejecutarCalculo();
-    showToast('Configuración y enlace de Google Sheets guardados exitosamente');
-    setTimeout(cerrarModalConfiguracion, 350);
-  }
-
-  function restaurarValoresFabrica() {
-    if (confirm('¿Restablecer los valores base a la configuración de fábrica DUNES?')) {
-      localStorage.removeItem(STORAGE_KEYS.BASE_CONFIG);
-      localStorage.removeItem(STORAGE_KEYS.LAST_INPUTS);
-
-      configInputs.peso.value = FACTORY_DEFAULTS.peso;
-      configInputs.envioKg.value = FACTORY_DEFAULTS.envioKg;
-      if (configInputs.costoCaja) configInputs.costoCaja.value = FACTORY_DEFAULTS.costoCaja.toFixed(2);
-      const costoPorPerfume = FACTORY_DEFAULTS.costoCaja / 4;
-      if (configInputs.reempaque) configInputs.reempaque.value = costoPorPerfume.toFixed(2);
-      configInputs.tc.value = FACTORY_DEFAULTS.tc;
-      configInputs.extras.value = FACTORY_DEFAULTS.extras;
-
-      const cantActual = Math.max(1, parseInt(inputs.cantidad.value, 10) || 1);
-      inputs.peso.value = FACTORY_DEFAULTS.peso;
-      inputs.envioKg.value = FACTORY_DEFAULTS.envioKg;
-      inputs.reempaque.value = (cantActual * costoPorPerfume).toFixed(2);
-      inputs.tc.value = FACTORY_DEFAULTS.tc;
-      inputs.extras.value = FACTORY_DEFAULTS.extras;
-
-      ejecutarCalculo();
-      showToast('Configuración de fábrica DUNES restaurada', 'info');
-      setTimeout(cerrarModalConfiguracion, 350);
-    }
-  }
-
-  /**
-   * Escapar HTML para seguridad
-   */
   function escapeHTML(str) {
     if (!str) return '';
     return str
+      .toString()
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
@@ -856,213 +213,509 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/'/g, '&#039;');
   }
 
-  /**
-   * ========================================================================
-   * GESTIÓN DE NAVEGACIÓN ENTRE MÓDULOS (COTIZADOR / CATÁLOGO / COTIZACIONES)
-   * Regla de Negocio: El Cotizador siempre es el módulo principal y la pantalla inicial.
-   * ========================================================================
-   */
-  function cambiarPestana(nombreTab) {
-    if (nombreTab === 'configuracion') {
-      abrirModalConfiguracion();
-      return;
-    }
+  function showToast(message, type = 'success') {
+    if (!elements.toastContainer) return;
+    const toast = document.createElement('div');
+    toast.className = `toast-item toast-${type}`;
+    const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
+    toast.innerHTML = `<span>${icon}</span><span>${escapeHTML(message)}</span>`;
+    elements.toastContainer.appendChild(toast);
 
-    vistaActiva = nombreTab;
-
-    // Actualizar botones de navegación
-    navTabs.forEach((tab) => {
-      const tabName = tab.getAttribute('data-tab');
-      if (tabName === nombreTab) {
-        tab.classList.add('is-active');
-        tab.setAttribute('aria-selected', 'true');
-      } else if (tabName !== 'configuracion') {
-        tab.classList.remove('is-active');
-        tab.setAttribute('aria-selected', 'false');
-      }
-    });
-
-    // Cambiar visibilidad de las vistas
-    Object.entries(views).forEach(([key, viewEl]) => {
-      if (!viewEl) return;
-      if (key === nombreTab) {
-        viewEl.classList.remove('is-hidden');
-        viewEl.classList.add('is-active');
-      } else {
-        viewEl.classList.add('is-hidden');
-        viewEl.classList.remove('is-active');
-      }
-    });
-
-    // Acciones al cambiar a cada módulo
-    if (nombreTab === 'catalogo') {
-      if (catalogoProductos.length === 0) {
-        cargarCatalogo(false);
-      } else {
-        // Reactivar lazy loading de tarjetas visibles al regresar a la pestaña
-        iniciarLazyLoadingCatalogo();
-      }
-      if (catalogoElements.busqueda) {
-        setTimeout(() => catalogoElements.busqueda.focus(), 150);
-      }
-    } else if (nombreTab === 'cotizaciones') {
-      renderizarHistorial();
-    }
+    setTimeout(() => {
+      toast.style.animation = 'toastSlideOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards';
+      setTimeout(() => toast.remove(), 320);
+    }, 2800);
   }
 
   /**
    * ========================================================================
-   * MÓDULO CATÁLOGO (SOLO CONSULTA CONECTADO A GOOGLE SHEETS)
-   * Reglas de Negocio:
-   * - Google Sheets es la ÚNICA fuente de edición.
-   * - La app SOLO visualiza información.
-   * - NO permitir edición, NO inputs modificables, NO botones de guardar.
-   * - NO inventario, NO stock, NO clientes, NO cálculos dentro del catálogo.
+   * GESTOR DEL CARRITO MAYORISTA & GENERADOR DE PEDIDOS
    * ========================================================================
    */
 
-  // Catálogo base de perfumes de lujo (con datos de respaldo offline)
-  const CATALOGO_DEFAULT = [
-    {
-      id: 'dp-live-1',
-      producto: '9 Am Dive 3.4 Oz',
-      precioUSA: 19.71,
-      categoria: 'Árabes',
-      genero: 'Unisex',
-      cantidad: 1,
-      pesoKg: 0.65,
-      fleteKg: 9.50,
-      reempaque: 1.00,
-      costosExtras: 10.00,
-      costoPeru: 91.41,
-      precioVenta: 139.00,
-      ganancia: 37.59
-    },
-    {
-      id: 'dp-1',
-      producto: 'Dior Sauvage EDT 100ml',
-      precioUSA: 19.95,
-      categoria: 'Diseñador',
-      genero: 'Hombre',
-      cantidad: 1,
-      pesoKg: 0.60,
-      fleteKg: 9.50,
-      reempaque: 1.00,
-      costosExtras: 15.00,
-      costoPeru: 86.53,
-      precioVenta: 139.00,
-      ganancia: 37.47
-    },
-    {
-      id: 'dp-2',
-      producto: 'Club de Nuit Intense Man EDT 105ml',
-      precioUSA: 28.00,
-      categoria: 'Árabes',
-      genero: 'Hombre',
-      cantidad: 2,
-      pesoKg: 0.70,
-      fleteKg: 9.50,
-      reempaque: 1.00,
-      costosExtras: 15.00,
-      costoPeru: 115.20,
-      precioVenta: 185.00,
-      ganancia: 69.80
-    },
-    {
-      id: 'dp-3',
-      producto: 'Khamrah Lattafa EDP 100ml',
-      precioUSA: 25.00,
-      categoria: 'Árabes',
-      genero: 'Unisex',
-      cantidad: 1,
-      pesoKg: 0.60,
-      fleteKg: 9.50,
-      reempaque: 1.00,
-      costosExtras: 15.00,
-      costoPeru: 112.50,
-      precioVenta: 175.00,
-      ganancia: 62.50
-    },
-    {
-      id: 'dp-4',
-      producto: 'Bleu de Chanel EDP 100ml',
-      precioUSA: 115.00,
-      categoria: 'Diseñador',
-      genero: 'Hombre',
-      cantidad: 1,
-      pesoKg: 0.60,
-      fleteKg: 9.50,
-      reempaque: 1.00,
-      costosExtras: 15.00,
-      costoPeru: 415.50,
-      precioVenta: 540.00,
-      ganancia: 124.50
-    },
-    {
-      id: 'dp-5',
-      producto: 'Versace Eros Flame EDP 100ml',
-      precioUSA: 58.00,
-      categoria: 'Diseñador',
-      genero: 'Hombre',
-      cantidad: 1,
-      pesoKg: 0.60,
-      fleteKg: 9.50,
-      reempaque: 1.00,
-      costosExtras: 15.00,
-      costoPeru: 220.00,
-      precioVenta: 310.00,
-      ganancia: 90.00
-    },
-    {
-      id: 'dp-6',
-      producto: 'Afnan 9PM EDP 100ml',
-      precioUSA: 26.50,
-      categoria: 'Árabes',
-      genero: 'Hombre',
-      cantidad: 1,
-      pesoKg: 0.65,
-      fleteKg: 9.50,
-      reempaque: 1.00,
-      costosExtras: 15.00,
-      costoPeru: 114.50,
-      precioVenta: 175.00,
-      ganancia: 60.50
-    },
-    {
-      id: 'dp-7',
-      producto: 'Yara Lattafa EDP 100ml',
-      precioUSA: 24.00,
-      categoria: 'Árabes',
-      genero: 'Mujer',
-      cantidad: 1,
-      pesoKg: 0.60,
-      fleteKg: 9.50,
-      reempaque: 1.00,
-      costosExtras: 15.00,
-      costoPeru: 108.50,
-      precioVenta: 165.00,
-      ganancia: 56.50
-    },
-    {
-      id: 'dp-8',
-      producto: 'Good Girl Carolina Herrera EDP 80ml',
-      precioUSA: 89.00,
-      categoria: 'Diseñador',
-      genero: 'Mujer',
-      cantidad: 1,
-      pesoKg: 0.60,
-      fleteKg: 9.50,
-      reempaque: 1.00,
-      costosExtras: 15.00,
-      costoPeru: 325.00,
-      precioVenta: 420.00,
-      ganancia: 95.00
+  function cargarCarrito() {
+    try {
+      const guardado = localStorage.getItem(STORAGE_KEYS.CARRITO);
+      if (guardado) {
+        const parsed = JSON.parse(guardado);
+        if (Array.isArray(parsed)) {
+          carrito = parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Error al leer carrito:', e);
+      carrito = [];
     }
-  ];
+
+    try {
+      const clienteGuardado = localStorage.getItem(STORAGE_KEYS.CLIENTE_NOMBRE);
+      if (clienteGuardado && elements.inputClienteNombre) {
+        elements.inputClienteNombre.value = clienteGuardado;
+      }
+    } catch (e) {
+      // Ignore
+    }
+
+    actualizarUIContadoresCarrito();
+  }
+
+  function guardarCarrito() {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CARRITO, JSON.stringify(carrito));
+    } catch (e) {
+      console.warn('Error al guardar carrito:', e);
+    }
+    actualizarUIContadoresCarrito();
+  }
+
+  function verificarEstadoProductoEnCatalogo(item) {
+    if (!catalogoProductos || catalogoProductos.length === 0) {
+      return { existe: true, esAgotado: false };
+    }
+
+    const itemNombreNorm = normalizarClaveColumna(item.producto);
+    const prodCatalogo = catalogoProductos.find(p => normalizarClaveColumna(p.producto) === itemNombreNorm) ||
+      catalogoProductos.find(p => p.id === item.id);
+
+    if (!prodCatalogo) {
+      return { existe: false, esAgotado: true, motivo: 'eliminado' };
+    }
+
+    return {
+      existe: true,
+      esAgotado: !!prodCatalogo.esAgotado,
+      productoCatalogo: prodCatalogo
+    };
+  }
+
+  function validarProductosDisponibles() {
+    const agotados = [];
+    for (const item of carrito) {
+      const estado = verificarEstadoProductoEnCatalogo(item);
+      if (!estado.existe || estado.esAgotado) {
+        agotados.push(item);
+      }
+    }
+    return {
+      esValido: agotados.length === 0,
+      agotados
+    };
+  }
+
+  function obtenerTotalesCarrito() {
+    let totalUnidadesDisponibles = 0;
+    let totalPedidoDisponible = 0;
+    let totalUnidadesBruto = 0;
+    let totalPedidoBruto = 0;
+    let hayAgotados = false;
+    let cantidadAgotados = 0;
+
+    for (const item of carrito) {
+      const estado = verificarEstadoProductoEnCatalogo(item);
+      const estaAgotado = !estado.existe || estado.esAgotado;
+
+      totalUnidadesBruto += item.cantidad;
+      totalPedidoBruto += item.subtotal;
+
+      // REGLA: Los productos agotados NO deben sumar al total unidades ni al total pedido
+      if (!estaAgotado) {
+        totalUnidadesDisponibles += item.cantidad;
+        totalPedidoDisponible += item.subtotal;
+      } else {
+        hayAgotados = true;
+        cantidadAgotados++;
+      }
+    }
+
+    return {
+      totalUnidades: totalUnidadesDisponibles,
+      totalPedido: Math.round((totalPedidoDisponible + Number.EPSILON) * 100) / 100,
+      totalUnidadesBruto,
+      totalPedidoBruto: Math.round((totalPedidoBruto + Number.EPSILON) * 100) / 100,
+      hayAgotados,
+      cantidadAgotados
+    };
+  }
+
+  function actualizarUIContadoresCarrito() {
+    const { totalUnidades, totalPedido, totalUnidadesBruto, hayAgotados } = obtenerTotalesCarrito();
+
+    // Contador en cabecera
+    if (elements.headerCartCount) {
+      elements.headerCartCount.textContent = totalUnidades;
+    }
+
+    // Barra flotante inferior
+    if (elements.floatingCartBar) {
+      if (totalUnidadesBruto > 0 || carrito.length > 0) {
+        elements.floatingCartBar.classList.remove('is-hidden');
+      } else {
+        elements.floatingCartBar.classList.add('is-hidden');
+      }
+    }
+
+    if (elements.floatingCartCount) {
+      elements.floatingCartCount.textContent = totalUnidades;
+    }
+
+    if (elements.floatingCartTotal) {
+      elements.floatingCartTotal.textContent = formatPEN(totalPedido);
+    }
+
+    // Totales en modal
+    if (elements.cartTotalUnidades) {
+      elements.cartTotalUnidades.textContent = totalUnidades;
+    }
+
+    if (elements.cartTotalSoles) {
+      elements.cartTotalSoles.textContent = formatPEN(totalPedido);
+    }
+
+    // REGLA 1: Si existe al menos 1 producto agotado -> Bloqueo prioritario
+    if (hayAgotados) {
+      if (elements.cartStockWarning) {
+        elements.cartStockWarning.style.display = 'flex';
+      }
+      if (elements.cartMinWarning) {
+        elements.cartMinWarning.style.display = 'none';
+      }
+      if (elements.btnEnviarWhatsapp) {
+        elements.btnEnviarWhatsapp.disabled = true;
+        elements.btnEnviarWhatsapp.classList.add('is-disabled');
+        elements.btnEnviarWhatsapp.setAttribute('aria-disabled', 'true');
+        elements.btnEnviarWhatsapp.innerHTML = `
+          <span class="whatsapp-btn-icon">🔒</span>
+          <span>ACTUALIZA TU PEDIDO</span>
+        `;
+      }
+      return;
+    }
+
+    // Si no hay productos agotados, ocultar advertencia de stock
+    if (elements.cartStockWarning) {
+      elements.cartStockWarning.style.display = 'none';
+    }
+
+    // REGLA 2: Validación de pedido mínimo mayorista (6 unidades disponibles)
+    const faltanUnidades = MIN_UNIDADES_MAYORISTA - totalUnidades;
+
+    if (totalUnidades < MIN_UNIDADES_MAYORISTA) {
+      // Estado Bloqueado: menos de 6 unidades
+      if (elements.cartMinWarning) {
+        elements.cartMinWarning.style.display = carrito.length > 0 ? 'flex' : 'none';
+      }
+      if (elements.cartMinRemainingText) {
+        elements.cartMinRemainingText.textContent = `Te faltan ${faltanUnidades} unidad${faltanUnidades === 1 ? '' : 'es'} para confirmar.`;
+      }
+      if (elements.btnEnviarWhatsapp) {
+        elements.btnEnviarWhatsapp.disabled = true;
+        elements.btnEnviarWhatsapp.classList.add('is-disabled');
+        elements.btnEnviarWhatsapp.setAttribute('aria-disabled', 'true');
+        elements.btnEnviarWhatsapp.innerHTML = `
+          <span class="whatsapp-btn-icon">🔒</span>
+          <span>PEDIDO MÍNIMO: 6 UNIDADES</span>
+        `;
+      }
+    } else {
+      // Estado Habilitado: 6 o más unidades disponibles
+      if (elements.cartMinWarning) {
+        elements.cartMinWarning.style.display = 'none';
+      }
+      if (elements.btnEnviarWhatsapp) {
+        elements.btnEnviarWhatsapp.disabled = false;
+        elements.btnEnviarWhatsapp.classList.remove('is-disabled');
+        elements.btnEnviarWhatsapp.removeAttribute('aria-disabled');
+        elements.btnEnviarWhatsapp.innerHTML = `
+          <span class="whatsapp-btn-icon">📲</span>
+          <span>ENVIAR PEDIDO POR WHATSAPP</span>
+        `;
+      }
+    }
+  }
+
+  function agregarAlPedido(productoId) {
+    const producto = catalogoProductos.find(p => p.id === productoId);
+    if (!producto || producto.esAgotado) {
+      showToast('Este producto se encuentra agotado', 'info');
+      return;
+    }
+
+    const cantidadSeleccionada = localCardQuantities[productoId] || 1;
+    const itemExistente = carrito.find(i => i.id === productoId);
+
+    if (itemExistente) {
+      itemExistente.cantidad += cantidadSeleccionada;
+      itemExistente.subtotal = Math.round((itemExistente.cantidad * itemExistente.puestoPeru + Number.EPSILON) * 100) / 100;
+    } else {
+      carrito.push({
+        id: producto.id,
+        producto: producto.producto,
+        precioUSA: producto.precioUSA,
+        puestoPeru: producto.puestoPeru,
+        imagen: producto.imagen,
+        cantidad: cantidadSeleccionada,
+        subtotal: Math.round((cantidadSeleccionada * producto.puestoPeru + Number.EPSILON) * 100) / 100
+      });
+    }
+
+    // Reiniciar selector de la tarjeta a 1
+    localCardQuantities[productoId] = 1;
+    const stepperValEl = document.getElementById(`stepper-val-${productoId}`);
+    if (stepperValEl) {
+      stepperValEl.textContent = '1';
+    }
+
+    guardarCarrito();
+    showToast(`Agregado: ${cantidadSeleccionada}x ${producto.producto}`);
+  }
+
+  function modificarCantidadEnCarrito(productoId, delta) {
+    const item = carrito.find(i => i.id === productoId);
+    if (!item) return;
+
+    item.cantidad += delta;
+    if (item.cantidad <= 0) {
+      eliminarItemDelCarrito(productoId);
+    } else {
+      item.subtotal = Math.round((item.cantidad * item.puestoPeru + Number.EPSILON) * 100) / 100;
+      guardarCarrito();
+      renderizarModalCarrito();
+    }
+  }
+
+  function eliminarItemDelCarrito(productoId) {
+    carrito = carrito.filter(i => i.id !== productoId);
+    guardarCarrito();
+    renderizarModalCarrito();
+    showToast('Producto retirado del pedido', 'info');
+  }
+
+  function solicitarVaciarPedido() {
+    if (carrito.length === 0) return;
+    abrirModalConfirmarVaciar();
+  }
+
+  function abrirModalConfirmarVaciar() {
+    if (!elements.modalConfirmarVaciar) return;
+    elements.modalConfirmarVaciar.classList.add('is-active');
+    elements.modalConfirmarVaciar.setAttribute('aria-hidden', 'false');
+  }
+
+  function cerrarModalConfirmarVaciar() {
+    if (!elements.modalConfirmarVaciar) return;
+    elements.modalConfirmarVaciar.classList.remove('is-active');
+    elements.modalConfirmarVaciar.setAttribute('aria-hidden', 'true');
+  }
+
+  function vaciarPedido() {
+    if (carrito.length === 0) return;
+    carrito = [];
+    guardarCarrito();
+    renderizarModalCarrito();
+    cerrarModalConfirmarVaciar();
+    showToast('Pedido vaciado', 'info');
+  }
+
+  function renderizarModalCarrito() {
+    if (!elements.carritoItemsLista) return;
+
+    elements.carritoItemsLista.innerHTML = '';
+    const hayItems = carrito.length > 0;
+
+    if (!hayItems) {
+      if (elements.carritoVacio) elements.carritoVacio.style.display = 'flex';
+      if (elements.carritoResumenBox) elements.carritoResumenBox.style.display = 'none';
+      if (elements.cartStockWarning) elements.cartStockWarning.style.display = 'none';
+      if (elements.cartMinWarning) elements.cartMinWarning.style.display = 'none';
+      if (elements.btnEnviarWhatsapp) elements.btnEnviarWhatsapp.style.display = 'none';
+      return;
+    }
+
+    if (elements.carritoVacio) elements.carritoVacio.style.display = 'none';
+    if (elements.carritoResumenBox) elements.carritoResumenBox.style.display = 'flex';
+    if (elements.btnEnviarWhatsapp) elements.btnEnviarWhatsapp.style.display = 'flex';
+
+    carrito.forEach(item => {
+      const row = document.createElement('div');
+      row.setAttribute('data-id', item.id);
+
+      const estado = verificarEstadoProductoEnCatalogo(item);
+      const estaAgotado = !estado.existe || estado.esAgotado;
+      const tieneImg = item.imagen && (item.imagen.startsWith('http://') || item.imagen.startsWith('https://'));
+
+      if (estaAgotado) {
+        row.className = 'cart-item-row is-item-agotado';
+        row.innerHTML = `
+          <div class="cart-item-thumb">
+            ${tieneImg ? `<img src="${escapeHTML(item.imagen)}" alt="${escapeHTML(item.producto)}" onerror="this.src=''; this.style.display='none';">` : '<span style="font-size: 1.2rem;">🧴</span>'}
+          </div>
+
+          <div class="cart-item-info cart-item-info-agotado">
+            <span class="cart-item-name cart-item-name-agotado" title="${escapeHTML(item.producto)}">
+              <span class="agotado-dot">🔴</span> ${escapeHTML(item.producto)}
+            </span>
+            <span class="cart-item-badge-agotado">AGOTADO</span>
+            <span class="cart-item-notice-agotado">Este producto ya no está disponible</span>
+          </div>
+
+          <div class="cart-item-controls cart-item-controls-agotado">
+            <button type="button" class="btn-cart-delete-agotado btn-cart-delete" data-id="${item.id}" title="Eliminar producto agotado" aria-label="Eliminar producto">
+              🗑️ Eliminar
+            </button>
+          </div>
+        `;
+      } else {
+        row.className = 'cart-item-row';
+        row.innerHTML = `
+          <div class="cart-item-thumb">
+            ${tieneImg ? `<img src="${escapeHTML(item.imagen)}" alt="${escapeHTML(item.producto)}" onerror="this.src=''; this.style.display='none';">` : '<span style="font-size: 1.2rem;">🧴</span>'}
+          </div>
+
+          <div class="cart-item-info">
+            <span class="cart-item-name" title="${escapeHTML(item.producto)}">${escapeHTML(item.producto)}</span>
+            <span class="cart-item-unit-price">Puesto en Perú: ${formatPEN(item.puestoPeru)}</span>
+          </div>
+
+          <div class="cart-item-controls">
+            <div class="cart-item-stepper">
+              <button type="button" class="btn-cart-minus" data-id="${item.id}" aria-label="Restar 1">-</button>
+              <span>${item.cantidad}</span>
+              <button type="button" class="btn-cart-plus" data-id="${item.id}" aria-label="Sumar 1">+</button>
+            </div>
+
+            <span class="cart-item-subtotal">${formatPEN(item.subtotal)}</span>
+
+            <button type="button" class="cart-item-delete btn-cart-delete" data-id="${item.id}" title="Eliminar del pedido" aria-label="Eliminar producto">🗑️</button>
+          </div>
+        `;
+      }
+
+      elements.carritoItemsLista.appendChild(row);
+    });
+
+    // Eventos dentro del modal
+    elements.carritoItemsLista.querySelectorAll('.btn-cart-minus').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        modificarCantidadEnCarrito(id, -1);
+      });
+    });
+
+    elements.carritoItemsLista.querySelectorAll('.btn-cart-plus').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        modificarCantidadEnCarrito(id, 1);
+      });
+    });
+
+    elements.carritoItemsLista.querySelectorAll('.btn-cart-delete').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        eliminarItemDelCarrito(id);
+      });
+    });
+
+    actualizarUIContadoresCarrito();
+  }
+
+  function abrirModalCarrito() {
+    if (!elements.modalCarrito) return;
+    renderizarModalCarrito();
+    elements.modalCarrito.classList.add('is-active');
+    elements.modalCarrito.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrarModalCarrito() {
+    if (!elements.modalCarrito) return;
+    elements.modalCarrito.classList.remove('is-active');
+    elements.modalCarrito.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
 
   /**
-   * Parser CSV compatible con RFC 4180 (soporta comillas, comas y saltos)
+   * Generación y Envío del Pedido a WhatsApp
+   * Formato oficial solicitado:
+   * 
+   * PEDIDO MAYORISTA GL EXPRESS
+   * 
+   * Cliente: [Nombre]
+   * 
+   * [cant] x [Producto]
+   * Precio: S/[precio]
+   * Subtotal: S/[subtotal]
+   * 
+   * TOTAL UNIDADES: [total]
+   * TOTAL PEDIDO: S/[total]
    */
+  function enviarPedidoWhatsApp() {
+    if (carrito.length === 0) {
+      showToast('Tu pedido está vacío', 'info');
+      return;
+    }
+
+    // Regla de negocio y seguridad 1: Validación de disponibilidad de productos
+    const validacionStock = validarProductosDisponibles();
+    if (!validacionStock.esValido) {
+      showToast('⚠️ Algunos productos de tu pedido ya no están disponibles. Elimínalos para continuar.', 'error');
+      renderizarModalCarrito();
+      return;
+    }
+
+    const { totalUnidades, totalPedido } = obtenerTotalesCarrito();
+
+    // Regla de negocio y seguridad 2: Validación de pedido mínimo mayorista (6 unidades disponibles)
+    if (totalUnidades < MIN_UNIDADES_MAYORISTA) {
+      const faltan = MIN_UNIDADES_MAYORISTA - totalUnidades;
+      showToast(`Pedido mínimo mayorista: 6 unidades. Te faltan ${faltan} para confirmar.`, 'error');
+      if (elements.cartMinWarning) elements.cartMinWarning.style.display = 'flex';
+      return;
+    }
+
+    const nombreCliente = elements.inputClienteNombre ? elements.inputClienteNombre.value.trim() : '';
+
+    // Guardar nombre en memoria
+    if (elements.inputClienteNombre) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.CLIENTE_NOMBRE, nombreCliente);
+      } catch (e) {}
+    }
+
+    let mensaje = 'PEDIDO MAYORISTA GL EXPRESS\n\n';
+    mensaje += `Cliente: ${nombreCliente}\n\n`;
+
+    carrito.forEach(item => {
+      mensaje += `${item.cantidad} x ${item.producto}\n`;
+      mensaje += `Precio: S/${item.puestoPeru.toFixed(2)}\n`;
+      mensaje += `Subtotal: S/${item.subtotal.toFixed(2)}\n\n`;
+    });
+
+    mensaje += `TOTAL UNIDADES: ${totalUnidades}\n`;
+    mensaje += `TOTAL PEDIDO: S/${totalPedido.toFixed(2)}`;
+
+    const urlWhatsApp = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMERO}&text=${encodeURIComponent(mensaje)}`;
+    window.open(urlWhatsApp, '_blank');
+  }
+
+  /**
+   * ========================================================================
+   * PARSER CSV Y MAPEO ESPECÍFICO DE LA PESTAÑA MAYORISTA
+   * Estructura oficial (Columnas A - L):
+   * A: Producto
+   * B: Precio USA ($)
+   * C: Cantidad (Oculto al cliente)
+   * D: Categoría
+   * E: Género
+   * F: Peso KG (Oculto)
+   * G: Flete x KG (Oculto)
+   * H: Reempaque (Oculto)
+   * I: Precio Dólar (T.C) (Oculto)
+   * J: Costo Perú -> Se mapea a puestoPeru ("PUESTO EN PERÚ")
+   * K: imagen
+   * L: Estado catálogo
+   * ========================================================================
+   */
+
   function parsearCSV(csvText) {
     const rows = [];
     let currentRow = [];
@@ -1124,38 +777,6 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/[^a-z0-9]/g, '');
   }
 
-  /**
-   * Convierte filas de Google Sheets en objetos normalizados según la estructura actual A-K:
-   * A: Producto
-   * B: Precio USA ($)
-   * C: Cantidad
-   * D: Peso KG
-   * E: Flete x KG
-   * F: Reempaque
-   * G: Precio Dólar (T.C)
-   * H: Costo Perú
-   * I: Precio Venta (S/.)
-   * J: Costos extras
-   * K: Ganancia (S/.)
-   */
-  /**
-   * Convierte filas de Google Sheets en objetos normalizados según la estructura oficial:
-   * Columna A: Producto
-   * Columna B: Precio USA ($)
-   * Columna C: Cantidad
-   * Columna D: Categoría
-   * Columna E: Género
-   * Columna F: Peso KG
-   * Columna G: Flete x KG
-   * Columna H: Reempaque
-   * Columna I: Precio Dólar (T.C)
-   * Columna J: Costo Perú
-   * Columna K: Precio Venta (S/.)
-   * Columna L: Costos extras
-   * Columna M: Ganancia (S/.)
-   * Columna N: Imagen
-   * Columna O: Estado catálogo
-   */
   function convertirFilasACatalogo(rows) {
     if (!rows || rows.length < 2) return [];
 
@@ -1163,7 +784,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const encontrarIndice = (posibles) => headers.findIndex(h => posibles.includes(h));
 
     const idxMap = {
-      // Mapeo exacto de los nombres de columnas oficiales (A-O):
       producto: encontrarIndice(['producto', 'perfume', 'nombre']),
       precioUSA: encontrarIndice(['preciousa', 'precio_usa', 'preciounitariousa']),
       cantidad: encontrarIndice(['cantidad', 'cant', 'unidades']),
@@ -1173,51 +793,25 @@ document.addEventListener('DOMContentLoaded', () => {
       fleteKg: encontrarIndice(['fletexkg', 'fletekg', 'flete_x_kg']),
       reempaque: encontrarIndice(['reempaque']),
       precioDolarTC: encontrarIndice(['preciodolartc', 'preciodolar', 'tc']),
-      costoPeru: encontrarIndice(['costoperu', 'costo_peru', 'costopuestoperu']),
-      precioVenta: encontrarIndice(['precioventas', 'precioventa', 'precio_venta']),
-      costosExtras: encontrarIndice(['costosextras', 'costosextraslocales', 'extras']),
-      ganancia: encontrarIndice(['ganancias', 'ganancia', 'ganancia_neta']),
-      imagen: encontrarIndice(['imagen', 'img', 'foto', 'image', 'urlimagen', 'imagenurl', 'fotourl']),
+      // La columna J es "Costo Perú" o "Costo Perú (S/.)", que en GL EXPRESS es el precio PUESTO EN PERÚ:
+      costoPeru: encontrarIndice(['costoperu', 'costoperus', 'costo_peru', 'costopuestoperu', 'puestoperu']),
+      imagen: encontrarIndice(['imagen', 'img', 'foto', 'image', 'urlimagen', 'imagenurl']),
       estadoCatalogo: encontrarIndice(['estadocatalogo', 'estado_catalogo', 'estado', 'status', 'disponibilidad'])
     };
 
-    // Respaldo estricto por posición de columnas A-N (0 a 13) o A-O (0 a 14):
-    // A: Producto (0), B: Precio USA ($) (1), C: Cantidad (2), D: Categoría (3), E: Género (4),
-    // F: Peso KG (5), G: Flete x KG (6), H: Reempaque (7), I: Precio Dólar (T.C) (8),
-    // J: Costo Perú (9), K: Precio Venta (S/.) (10), L: Costos extras (11), M: Ganancia (S/.) (12), N: Imagen (13),
-    // O: Estado catálogo (14)
-    const tieneEstructuraConCatGen = idxMap.categoria !== -1 || idxMap.genero !== -1 || headers.length >= 13;
-
-    if (tieneEstructuraConCatGen) {
-      if (idxMap.producto === -1 && headers.length > 0) idxMap.producto = 0;
-      if (idxMap.precioUSA === -1 && headers.length > 1) idxMap.precioUSA = 1;
-      if (idxMap.cantidad === -1 && headers.length > 2) idxMap.cantidad = 2;
-      if (idxMap.categoria === -1 && headers.length > 3) idxMap.categoria = 3;
-      if (idxMap.genero === -1 && headers.length > 4) idxMap.genero = 4;
-      if (idxMap.pesoKg === -1 && headers.length > 5) idxMap.pesoKg = 5;
-      if (idxMap.fleteKg === -1 && headers.length > 6) idxMap.fleteKg = 6;
-      if (idxMap.reempaque === -1 && headers.length > 7) idxMap.reempaque = 7;
-      if (idxMap.precioDolarTC === -1 && headers.length > 8) idxMap.precioDolarTC = 8;
-      if (idxMap.costoPeru === -1 && headers.length > 9) idxMap.costoPeru = 9;
-      if (idxMap.precioVenta === -1 && headers.length > 10) idxMap.precioVenta = 10;
-      if (idxMap.costosExtras === -1 && headers.length > 11) idxMap.costosExtras = 11;
-      if (idxMap.ganancia === -1 && headers.length > 12) idxMap.ganancia = 12;
-      if (idxMap.imagen === -1 && headers.length > 13) idxMap.imagen = 13;
-      if (idxMap.estadoCatalogo === -1 && headers.length > 14) idxMap.estadoCatalogo = 14;
-    } else {
-      // Respaldo retrocompatible para formatos anteriores A-K (0 a 10)
-      if (idxMap.producto === -1 && headers.length > 0) idxMap.producto = 0;
-      if (idxMap.precioUSA === -1 && headers.length > 1) idxMap.precioUSA = 1;
-      if (idxMap.cantidad === -1 && headers.length > 2) idxMap.cantidad = 2;
-      if (idxMap.pesoKg === -1 && headers.length > 3) idxMap.pesoKg = 3;
-      if (idxMap.fleteKg === -1 && headers.length > 4) idxMap.fleteKg = 4;
-      if (idxMap.reempaque === -1 && headers.length > 5) idxMap.reempaque = 5;
-      if (idxMap.precioDolarTC === -1 && headers.length > 6) idxMap.precioDolarTC = 6;
-      if (idxMap.costoPeru === -1 && headers.length > 7) idxMap.costoPeru = 7;
-      if (idxMap.precioVenta === -1 && headers.length > 8) idxMap.precioVenta = 8;
-      if (idxMap.costosExtras === -1 && headers.length > 9) idxMap.costosExtras = 9;
-      if (idxMap.ganancia === -1 && headers.length > 10) idxMap.ganancia = 10;
-    }
+    // Respaldo estricto por posición A-L (0 a 11)
+    if (idxMap.producto === -1 && headers.length > 0) idxMap.producto = 0;
+    if (idxMap.precioUSA === -1 && headers.length > 1) idxMap.precioUSA = 1;
+    if (idxMap.cantidad === -1 && headers.length > 2) idxMap.cantidad = 2;
+    if (idxMap.categoria === -1 && headers.length > 3) idxMap.categoria = 3;
+    if (idxMap.genero === -1 && headers.length > 4) idxMap.genero = 4;
+    if (idxMap.pesoKg === -1 && headers.length > 5) idxMap.pesoKg = 5;
+    if (idxMap.fleteKg === -1 && headers.length > 6) idxMap.fleteKg = 6;
+    if (idxMap.reempaque === -1 && headers.length > 7) idxMap.reempaque = 7;
+    if (idxMap.precioDolarTC === -1 && headers.length > 8) idxMap.precioDolarTC = 8;
+    if (idxMap.costoPeru === -1 && headers.length > 9) idxMap.costoPeru = 9;
+    if (idxMap.imagen === -1 && headers.length > 10) idxMap.imagen = 10;
+    if (idxMap.estadoCatalogo === -1 && headers.length > 11) idxMap.estadoCatalogo = 11;
 
     const limpiarNumero = (val, valorDefault = 0) => {
       if (val === undefined || val === null || val === '') return valorDefault;
@@ -1233,19 +827,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const nombre = idxMap.producto !== -1 ? (row[idxMap.producto] || '').trim() : '';
       if (!nombre) continue;
 
-      // Detección de Estado catálogo: Disponible vs No disponible (Agotado)
+      // Detección de disponibilidad
       let esAgotado = false;
       let estadoCatalogo = 'Disponible';
       if (idxMap.estadoCatalogo !== -1) {
         const rawEstado = (row[idxMap.estadoCatalogo] || '').toString().trim();
-        const estadoVal = rawEstado
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '');
-        if (estadoVal.includes('no disponible')) {
+        const estadoNorm = normalizarClaveColumna(rawEstado);
+        if (estadoNorm.includes('no') || estadoNorm.includes('agotad')) {
           esAgotado = true;
           estadoCatalogo = 'No disponible';
-        } else if (estadoVal.includes('disponible')) {
+        } else if (estadoNorm.includes('disponib')) {
           esAgotado = false;
           estadoCatalogo = 'Disponible';
         } else if (rawEstado) {
@@ -1254,28 +845,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       productos.push({
-        id: `gs-${i}`,
-        // Campos visibles en el catálogo:
+        id: `gl-${i}`,
         producto: nombre,
         precioUSA: idxMap.precioUSA !== -1 ? limpiarNumero(row[idxMap.precioUSA], 0) : 0,
-        costoPeru: idxMap.costoPeru !== -1 ? limpiarNumero(row[idxMap.costoPeru], 0) : 0,
-        precioVenta: idxMap.precioVenta !== -1 ? limpiarNumero(row[idxMap.precioVenta], 0) : 0,
-        ganancia: idxMap.ganancia !== -1 ? limpiarNumero(row[idxMap.ganancia], 0) : 0,
-
-        // Campos de filtrado y estado:
+        // DATO MAYORISTA: Mapeado exclusivamente como puestoPeru (S/)
+        puestoPeru: idxMap.costoPeru !== -1 ? limpiarNumero(row[idxMap.costoPeru], 0) : 0,
         categoria: (idxMap.categoria !== -1 && row[idxMap.categoria]) ? (row[idxMap.categoria] || '').toString().trim() : '',
         genero: (idxMap.genero !== -1 && row[idxMap.genero]) ? (row[idxMap.genero] || '').toString().trim() : '',
+        imagen: (idxMap.imagen !== -1 && row[idxMap.imagen]) ? (row[idxMap.imagen] || '').toString().trim() : '',
         estadoCatalogo: estadoCatalogo,
-        esAgotado: esAgotado,
-
-        // Datos internos mantenidos:
-        cantidad: idxMap.cantidad !== -1 ? Math.max(1, parseInt(row[idxMap.cantidad], 10) || 1) : 1,
-        pesoKg: idxMap.pesoKg !== -1 ? limpiarNumero(row[idxMap.pesoKg], 0.6) : 0.6,
-        fleteKg: idxMap.fleteKg !== -1 ? limpiarNumero(row[idxMap.fleteKg], 9.50) : 9.50,
-        reempaque: idxMap.reempaque !== -1 ? limpiarNumero(row[idxMap.reempaque], 1.00) : 1.00,
-        tc: idxMap.precioDolarTC !== -1 ? limpiarNumero(row[idxMap.precioDolarTC], 3.40) : 3.40,
-        costosExtras: idxMap.costosExtras !== -1 ? limpiarNumero(row[idxMap.costosExtras], 10.00) : 10.00,
-        imagen: (idxMap.imagen !== -1 && row[idxMap.imagen]) ? (row[idxMap.imagen] || '').toString().trim() : ''
+        esAgotado: esAgotado
       });
     }
 
@@ -1284,33 +863,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function construirURLGoogleSheetCSV(input) {
     const raw = (input && input.trim()) ? input.trim() : DEFAULT_SHEETS_CSV_URL;
-
-    if (raw.includes('/pub') || raw.includes('/export?format=csv') || raw.includes('/gviz/tq?tqx=out:csv') || raw.includes('output=csv')) {
-      const sep = raw.includes('?') ? '&' : '?';
-      return `${raw}${sep}_t=${Date.now()}`;
-    }
-
-    const match = raw.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-    const sheetId = (match && match[1] && match[1] !== 'e') ? match[1] : (/^[a-zA-Z0-9-_]{20,}$/.test(raw) ? raw : null);
-
-    if (!sheetId) return `${raw}${raw.includes('?') ? '&' : '?'}_t=${Date.now()}`;
-
-    const gidMatch = raw.match(/[#&?]gid=([0-9]+)/);
-    const gidParam = (gidMatch && gidMatch[1]) ? `&gid=${gidMatch[1]}` : '';
-
-    return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv${gidParam}&_t=${Date.now()}`;
+    const sep = raw.includes('?') ? '&' : '?';
+    return `${raw}${sep}_t=${Date.now()}`;
   }
 
   /**
-   * Renderiza las tarjetas del Catálogo en modo SOLO CONSULTA — Estilo Perfumería Luxury.
-   * Muestra todos los 11 datos requeridos sin eliminar ninguno:
-   * - Encabezado: Producto + Inversión Precio USA al lado
-   * - Bloque Principal: Costo Perú, Venta, Ganancia
-   * - Pie: Datos internos de cálculo en una sola línea compacta
-   * - Soporte de imagen opcional
+   * ========================================================================
+   * RENDERIZADO DEL CATÁLOGO MAYORISTA & CONTADORES
+   * ========================================================================
    */
+
   function actualizarContadorInventarioGeneral() {
-    if (!catalogoElements.contador) return;
+    if (!elements.contador) return;
 
     let disponiblesCount = 0;
     let agotadosCount = 0;
@@ -1318,15 +882,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     for (let i = 0; i < baseProductos.length; i++) {
       const p = baseProductos[i];
-      const agot = p.esAgotado || (p.estadoCatalogo && p.estadoCatalogo.toLowerCase().includes('no disponible'));
-      if (agot) {
+      if (p.esAgotado) {
         agotadosCount++;
       } else {
         disponiblesCount++;
       }
     }
 
-    catalogoElements.contador.innerHTML = `
+    elements.contador.innerHTML = `
       <span class="catalog-stat-item stat-disp">🟢 <strong>${disponiblesCount}</strong> DISPONIBLES</span>
       <span class="catalog-stat-sep">•</span>
       <span class="catalog-stat-item stat-agot">🔴 <strong>${agotadosCount}</strong> AGOTADOS</span>
@@ -1334,117 +897,140 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderizarCatalogo(productosParaMostrar, terminoBusqueda = '') {
-    if (!catalogoElements.lista) return;
+    if (!elements.lista) return;
 
-    catalogoElements.lista.innerHTML = '';
+    elements.lista.innerHTML = '';
     const total = productosParaMostrar.length;
 
-    // 1. Contador superior (Inventario Real): Siempre fijo con TODOS los productos de Google Sheets
     actualizarContadorInventarioGeneral();
 
-    // 2. Nuevo contador de resultados dinámico (Búsqueda y Filtros)
-    if (catalogoElements.contadorResultados) {
-      catalogoElements.contadorResultados.textContent = (total === 1)
+    if (elements.contadorResultados) {
+      elements.contadorResultados.textContent = (total === 1)
         ? '1 perfume encontrado'
         : `${total} perfumes encontrados`;
     }
 
     if (total === 0) {
-      catalogoElements.empty.style.display = 'flex';
+      elements.empty.style.display = 'flex';
       if (terminoBusqueda) {
-        catalogoElements.emptyTitle.textContent = `No se encontraron perfumes para "${terminoBusqueda}"`;
-        catalogoElements.emptyDesc.textContent = 'Intenta buscando por otra marca o nombre, o ajusta los filtros de categoría/género/estado.';
+        elements.emptyTitle.textContent = `No se encontraron perfumes para "${terminoBusqueda}"`;
+        elements.emptyDesc.textContent = 'Intenta buscando por otra marca o ajusta los filtros seleccionados.';
       } else if (filtroCategoriaActivo !== 'todos' || filtroGeneroActivo !== 'todos' || filtroEstadoActivo !== 'todos') {
-        catalogoElements.emptyTitle.textContent = 'No hay perfumes con los filtros seleccionados';
-        catalogoElements.emptyDesc.textContent = 'Prueba seleccionando "Todos" en categoría, género o estado.';
+        elements.emptyTitle.textContent = 'No hay perfumes con los filtros seleccionados';
+        elements.emptyDesc.textContent = 'Prueba seleccionando "Todos" en categoría, género o estado.';
       } else {
-        catalogoElements.emptyTitle.textContent = 'Catálogo vacío';
-        catalogoElements.emptyDesc.textContent = 'No hay filas en la hoja de Google Sheets.';
+        elements.emptyTitle.textContent = 'Catálogo vacío';
+        elements.emptyDesc.textContent = 'No hay perfumes disponibles en la pestaña MAYORISTA.';
       }
       return;
     }
 
-    catalogoElements.empty.style.display = 'none';
+    elements.empty.style.display = 'none';
 
-    productosParaMostrar.forEach((item) => {
-      const esAgotado = item.esAgotado || (item.estadoCatalogo && item.estadoCatalogo.toLowerCase().includes('no disponible'));
+    productosParaMostrar.forEach(item => {
       const card = document.createElement('article');
-      card.className = esAgotado ? 'catalog-card is-agotado' : 'catalog-card';
+      card.className = item.esAgotado ? 'wholesale-card is-agotado' : 'wholesale-card';
       card.setAttribute('data-id', item.id);
 
-      const gananciaPositiva = (item.ganancia >= 0);
       const tieneImagen = item.imagen && (item.imagen.startsWith('http://') || item.imagen.startsWith('https://'));
+      const cantActual = localCardQuantities[item.id] || 1;
 
       card.innerHTML = `
-        <!-- 1. Encabezado: Perfume (Icono o Mini imagen) + Nombre y Precio USA cercano -->
-        <div class="card-top-section">
-          <div class="card-title-group">
-            ${tieneImagen ? `
-              <div class="card-thumb-wrapper">
-                <div class="card-thumb-placeholder">
-                  <span class="card-thumb-shimmer"></span>
-                  <span class="card-thumb-fallback-icon">🧴</span>
-                </div>
-                <img data-src="${escapeHTML(item.imagen)}" alt="${escapeHTML(item.producto)}" class="card-mini-thumb" onerror="this.style.display='none'; if(this.previousElementSibling) this.previousElementSibling.classList.add('is-failed');">
-              </div>
-            ` : `
-              <span class="card-perfume-icon">🧴</span>
-            `}
-            <h3 class="card-product-name" title="${escapeHTML(item.producto)}${esAgotado ? ' (AGOTADO)' : ''}">${escapeHTML(item.producto)}${esAgotado ? ' <span class="card-agotado-badge">(AGOTADO)</span>' : ''}</h3>
-          </div>
-          <div class="card-usa-tag">
-            <span class="usa-lbl">USA</span>
-            <span class="usa-val">${formatUSD(item.precioUSA)}</span>
-          </div>
+        <!-- Imagen Centrada -->
+        <div class="wholesale-img-wrapper">
+          ${tieneImagen ? `
+            <div class="card-thumb-placeholder">
+              <span class="card-thumb-shimmer"></span>
+              <span class="card-thumb-fallback-icon">🧴</span>
+            </div>
+            <img data-src="${escapeHTML(item.imagen)}" alt="${escapeHTML(item.producto)}" class="wholesale-img" onerror="this.style.display='none'; if(this.previousElementSibling) this.previousElementSibling.classList.add('is-failed');">
+          ` : `
+            <span class="card-thumb-fallback-icon" style="opacity: 0.65; font-size: 2.2rem;">🧴</span>
+          `}
         </div>
 
-        <!-- 2. Bloque Principal: Sección visual con 3 valores grandes -->
-        <div class="card-trio-grid">
-          <div class="trio-item trio-costo">
-            <span class="trio-lbl">Costo Perú</span>
-            <span class="trio-val val-costo">${formatPEN(item.costoPeru)}</span>
-          </div>
-          <div class="trio-item trio-venta">
-            <span class="trio-lbl">Venta</span>
-            <span class="trio-val val-venta">${formatPEN(item.precioVenta)}</span>
-          </div>
-          <div class="trio-item trio-ganancia ${gananciaPositiva ? 'is-profit' : 'is-loss'}">
-            <span class="trio-lbl">Ganancia</span>
-            <span class="trio-val val-ganancia">${formatPEN(item.ganancia)}</span>
-          </div>
+        <!-- Título del Perfume -->
+        <div class="wholesale-title-wrapper">
+          <h3 class="wholesale-title">
+            ${escapeHTML(item.producto)}
+            ${item.esAgotado ? '<span class="card-agotado-badge">(AGOTADO)</span>' : ''}
+          </h3>
         </div>
 
-        <!-- 3. Datos Internos: Una sola línea inferior compacta y discreta -->
-        <div class="card-internal-footer">
-          <span class="calc-line-text">${item.cantidad}ud • ${Number(item.pesoKg || 0).toFixed(2)}kg • Flete ${formatUSD(item.fleteKg)} • Rep ${formatUSD(item.reempaque)} • TC ${Number(item.tc || 0).toFixed(2)} • Extras ${formatPEN(item.costosExtras)}</span>
+        <!-- Bloque de Precio Mayorista (Únicamente PUESTO EN PERÚ) -->
+        <div class="wholesale-pricing-block">
+          <span class="wholesale-price-lbl">PUESTO EN PERÚ</span>
+          <span class="wholesale-price-peru">${formatPEN(item.puestoPeru)}</span>
+        </div>
+
+        <!-- Fila de Acciones: Selector de Cantidad [-] 1 [+] y Botón Agregar -->
+        <div class="wholesale-actions-row">
+          <div class="wholesale-stepper">
+            <button type="button" class="stepper-btn btn-card-minus" data-id="${item.id}" aria-label="Disminuir cantidad">-</button>
+            <span class="stepper-val" id="stepper-val-${item.id}">${cantActual}</span>
+            <button type="button" class="stepper-btn btn-card-plus" data-id="${item.id}" aria-label="Aumentar cantidad">+</button>
+          </div>
+
+          <button type="button" class="btn-add-wholesale btn-card-add" data-id="${item.id}" aria-label="Agregar al pedido">
+            <span class="btn-add-short">🛒 Agregar</span>
+            <span class="btn-add-full">🛒 Agregar al pedido</span>
+          </button>
         </div>
       `;
 
-      catalogoElements.lista.appendChild(card);
+      elements.lista.appendChild(card);
     });
 
-    // Activar carga progresiva (Lazy Loading) de las imágenes visibles en pantalla
+    // Conectar eventos de los selectores [-] 1 [+]
+    elements.lista.querySelectorAll('.btn-card-minus').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        let current = localCardQuantities[id] || 1;
+        if (current > 1) {
+          current--;
+          localCardQuantities[id] = current;
+          const valEl = document.getElementById(`stepper-val-${id}`);
+          if (valEl) valEl.textContent = current;
+        }
+      });
+    });
+
+    elements.lista.querySelectorAll('.btn-card-plus').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        let current = localCardQuantities[id] || 1;
+        current++;
+        localCardQuantities[id] = current;
+        const valEl = document.getElementById(`stepper-val-${id}`);
+        if (valEl) valEl.textContent = current;
+      });
+    });
+
+    // Conectar eventos del botón Agregar al pedido
+    elements.lista.querySelectorAll('.btn-card-add').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        agregarAlPedido(id);
+      });
+    });
+
     iniciarLazyLoadingCatalogo();
   }
 
-  /**
-   * Carga progresiva (Lazy Loading) de imágenes del catálogo con IntersectionObserver.
-   * Carga únicamente las imágenes que entran en la pantalla visible del usuario.
-   */
   function iniciarLazyLoadingCatalogo() {
     if (catalogoImageObserver) {
       catalogoImageObserver.disconnect();
       catalogoImageObserver = null;
     }
 
-    if (!catalogoElements.lista) return;
+    if (!elements.lista) return;
 
-    const lazyImages = catalogoElements.lista.querySelectorAll('img.card-mini-thumb[data-src]');
+    const lazyImages = elements.lista.querySelectorAll('img.wholesale-img[data-src]');
     if (!lazyImages || lazyImages.length === 0) return;
 
     if ('IntersectionObserver' in window) {
       catalogoImageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach((entry) => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
             const img = entry.target;
             cargarImagenLazy(img);
@@ -1453,56 +1039,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }, {
         root: null,
-        rootMargin: '100px 0px 100px 0px', // Anticipa la carga 100px antes de entrar a la pantalla
+        rootMargin: '120px 0px',
         threshold: 0.01
       });
 
-      lazyImages.forEach((img) => catalogoImageObserver.observe(img));
+      lazyImages.forEach(img => catalogoImageObserver.observe(img));
     } else {
-      // Fallback para navegadores antiguos sin IntersectionObserver
-      lazyImages.forEach((img) => cargarImagenLazy(img));
+      lazyImages.forEach(img => cargarImagenLazy(img));
     }
   }
 
-  /**
-   * Carga asíncrona de una imagen con transición suave entre el placeholder y la imagen real.
-   */
   function cargarImagenLazy(img) {
     const src = img.getAttribute('data-src');
     if (!src) return;
     img.removeAttribute('data-src');
 
-    const wrapper = img.closest('.card-thumb-wrapper');
+    const wrapper = img.closest('.wholesale-img-wrapper');
     const placeholder = wrapper ? wrapper.querySelector('.card-thumb-placeholder') : null;
 
     const preloader = new Image();
     preloader.onload = () => {
       img.src = src;
       img.classList.add('is-loaded');
-      if (placeholder) {
-        placeholder.classList.add('is-hidden');
-      }
+      if (placeholder) placeholder.classList.add('is-hidden');
     };
     preloader.onerror = () => {
       img.style.display = 'none';
-      if (placeholder) {
-        placeholder.classList.add('is-failed');
-      }
+      if (placeholder) placeholder.classList.add('is-failed');
     };
     preloader.src = src;
   }
 
   /**
-   * Filtrado en tiempo real con el Buscador
+   * ========================================================================
+   * FILTRADO EN TIEMPO REAL (Buscador, Categoría, Género, Estado)
+   * ========================================================================
    */
-  /**
-   * Filtrado en tiempo real con el Buscador y los Filtros de Categoría y Género
-   */
-  function filtrarCatalogo() {
-    const termino = catalogoElements.busqueda ? catalogoElements.busqueda.value.trim() : '';
 
-    if (catalogoElements.btnLimpiar) {
-      catalogoElements.btnLimpiar.style.display = termino ? 'flex' : 'none';
+  function filtrarCatalogo() {
+    const termino = elements.busqueda ? elements.busqueda.value.trim() : '';
+
+    if (elements.btnLimpiar) {
+      elements.btnLimpiar.style.display = termino ? 'flex' : 'none';
     }
 
     const normalizar = (s) => (s || '')
@@ -1517,14 +1095,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const genFiltroNorm = normalizar(filtroGeneroActivo);
     const estFiltroNorm = normalizar(filtroEstadoActivo);
 
-    const filtrados = catalogoProductos.filter((item) => {
-      // 1. Filtro por término de búsqueda en el nombre del producto
+    const filtrados = catalogoProductos.filter(item => {
+      // 1. Buscador por nombre
       if (terminoNorm) {
         const nombreNorm = normalizar(item.producto);
         if (!nombreNorm.includes(terminoNorm)) return false;
       }
 
-      // 2. Filtro de Categoría (Opciones: Todos | Diseñador | Árabes)
+      // 2. Filtro Categoría
       if (catFiltroNorm && catFiltroNorm !== 'todos') {
         const itemCatNorm = normalizar(item.categoria);
         if (catFiltroNorm === 'disenador') {
@@ -1536,11 +1114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 3. Filtro de Género (Opciones: Todos | Hombre | Mujer)
-      // Regla de Negocio solicitada:
-      // - Todos: Muestra Hombre, Mujer y Unisex (todo)
-      // - Hombre: Muestra Género = Hombre O Género = Unisex
-      // - Mujer: Muestra Género = Mujer O Género = Unisex
+      // 3. Filtro Género (Hombre incluye Unisex, Mujer incluye Unisex)
       if (genFiltroNorm && genFiltroNorm !== 'todos') {
         const itemGenNorm = normalizar(item.genero);
         const esUnisex = itemGenNorm.includes('unisex');
@@ -1554,15 +1128,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 4. Filtro de Estado (Opciones: Todos | Disponibles | Agotados)
-      // Reglas:
-      // - Todos muestra todos los productos.
-      // - Disponibles muestra únicamente Estado catálogo = Disponible.
-      // - Agotados muestra únicamente Estado catálogo = No disponible.
+      // 4. Filtro Estado
       if (estFiltroNorm && estFiltroNorm !== 'todos') {
-        const esAgotado = item.esAgotado || (item.estadoCatalogo && normalizar(item.estadoCatalogo).includes('no disponible'));
-        if (estFiltroNorm === 'disponibles' && esAgotado) return false;
-        if (estFiltroNorm === 'agotados' && !esAgotado) return false;
+        if (estFiltroNorm === 'disponibles' && item.esAgotado) return false;
+        if (estFiltroNorm === 'agotados' && !item.esAgotado) return false;
       }
 
       return true;
@@ -1571,18 +1140,31 @@ document.addEventListener('DOMContentLoaded', () => {
     renderizarCatalogo(filtrados, termino);
   }
 
+  function actualizarIndicadorFiltrosActivos() {
+    const hayFiltrosActivos = (filtroCategoriaActivo !== 'todos') || (filtroGeneroActivo !== 'todos') || (filtroEstadoActivo !== 'todos');
+    if (elements.toggleFiltrosDot) {
+      elements.toggleFiltrosDot.style.display = hayFiltrosActivos ? 'inline-block' : 'none';
+    }
+    if (elements.btnToggleFiltros) {
+      elements.btnToggleFiltros.classList.toggle('has-active-filters', hayFiltrosActivos);
+    }
+  }
+
   /**
-   * Carga y sincronización con Google Sheets (Caché local + Red)
+   * ========================================================================
+   * CARGA Y SINCRONIZACIÓN CON PESTAÑA MAYORISTA GOOGLE SHEETS
+   * ========================================================================
    */
+
   async function cargarCatalogo(forzarRed = false) {
     if (catalogoCargando) return;
     catalogoCargando = true;
 
-    if (catalogoElements.btnSync) catalogoElements.btnSync.classList.add('is-spinning');
-    if (catalogoElements.syncDot) catalogoElements.syncDot.className = 'sync-status-dot is-syncing';
-    if (catalogoElements.syncText) catalogoElements.syncText.textContent = 'Consultando Google Sheets...';
+    if (elements.btnSync) elements.btnSync.classList.add('is-spinning');
+    if (elements.syncDot) elements.syncDot.className = 'sync-status-dot is-syncing';
+    if (elements.syncText) elements.syncText.textContent = 'Consultando pestaña MAYORISTA...';
 
-    // 1. Cargar caché previo
+    // 1. Cargar caché previo si no se fuerza red
     if (!forzarRed) {
       try {
         const cacheGuardada = localStorage.getItem(STORAGE_KEYS.CATALOGO_CACHE);
@@ -1592,33 +1174,20 @@ document.addEventListener('DOMContentLoaded', () => {
             catalogoProductos = parsed;
             renderizarCatalogo(catalogoProductos);
             const ultima = localStorage.getItem(STORAGE_KEYS.CATALOGO_LAST_SYNC) || 'Previa';
-            if (catalogoElements.syncDot) catalogoElements.syncDot.className = 'sync-status-dot';
-            if (catalogoElements.syncText) catalogoElements.syncText.textContent = `Sincronizado (${ultima})`;
+            if (elements.syncDot) elements.syncDot.className = 'sync-status-dot';
+            if (elements.syncText) elements.syncText.textContent = `Sincronizado (${ultima})`;
           }
         }
       } catch (e) {
-        console.warn('Error al leer caché local del catálogo', e);
+        console.warn('Error al leer caché local:', e);
       }
     }
 
-    // 2. Obtener URL configurada de Google Sheets
-    const sheetsUrlGuardada = localStorage.getItem(STORAGE_KEYS.SHEETS_URL);
-    const urlCSV = construirURLGoogleSheetCSV(sheetsUrlGuardada);
+    // 2. URL de conexión a la pestaña MAYORISTA
+    const sheetsUrlConfigurada = localStorage.getItem(STORAGE_KEYS.SHEETS_URL);
+    const urlCSV = construirURLGoogleSheetCSV(sheetsUrlConfigurada);
 
-    if (!urlCSV) {
-      if (catalogoProductos.length === 0) {
-        catalogoProductos = [...CATALOGO_DEFAULT];
-        localStorage.setItem(STORAGE_KEYS.CATALOGO_CACHE, JSON.stringify(catalogoProductos));
-        renderizarCatalogo(catalogoProductos);
-      }
-      if (catalogoElements.syncDot) catalogoElements.syncDot.className = 'sync-status-dot';
-      if (catalogoElements.syncText) catalogoElements.syncText.textContent = 'Catálogo base activo';
-      if (catalogoElements.btnSync) catalogoElements.btnSync.classList.remove('is-spinning');
-      catalogoCargando = false;
-      return;
-    }
-
-    // 3. Petición en vivo a Google Sheets
+    // 3. Petición en vivo
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -1638,87 +1207,89 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (items.length > 0) {
         catalogoProductos = items;
-        localStorage.setItem(STORAGE_KEYS.CATALOGO_CACHE, JSON.stringify(items));
-        const horaSync = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
-        localStorage.setItem(STORAGE_KEYS.CATALOGO_LAST_SYNC, horaSync);
+        try {
+          localStorage.setItem(STORAGE_KEYS.CATALOGO_CACHE, JSON.stringify(items));
+          const horaSync = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+          localStorage.setItem(STORAGE_KEYS.CATALOGO_LAST_SYNC, horaSync);
+          if (elements.syncDot) elements.syncDot.className = 'sync-status-dot';
+          if (elements.syncText) elements.syncText.textContent = `Sincronizado (${horaSync})`;
+        } catch (e) {}
 
         renderizarCatalogo(catalogoProductos);
-        if (catalogoElements.syncDot) catalogoElements.syncDot.className = 'sync-status-dot';
-        if (catalogoElements.syncText) catalogoElements.syncText.textContent = `Sincronizado (${horaSync})`;
+        actualizarUIContadoresCarrito();
+        if (elements.modalCarrito && elements.modalCarrito.classList.contains('is-active')) {
+          renderizarModalCarrito();
+        }
         showToast(`Catálogo sincronizado: ${items.length} perfumes cargados`);
       } else {
-        throw new Error('La hoja no contiene filas con datos');
+        // Si la pestaña aún no tiene filas de datos, mantener el respaldo activo
+        if (catalogoProductos.length === 0) {
+          catalogoProductos = [...CATALOGO_DEFAULT];
+          renderizarCatalogo(catalogoProductos);
+        }
+        if (elements.syncDot) elements.syncDot.className = 'sync-status-dot';
+        if (elements.syncText) elements.syncText.textContent = 'Pestaña MAYORISTA conectada (0 filas)';
       }
     } catch (err) {
-      console.warn('[DUNES CATÁLOGO] Error al conectar con Google Sheets:', err);
+      console.warn('[GL EXPRESS] Error al conectar con Google Sheets:', err);
       if (catalogoProductos.length === 0) {
         catalogoProductos = [...CATALOGO_DEFAULT];
         renderizarCatalogo(catalogoProductos);
       }
-      if (catalogoElements.syncDot) catalogoElements.syncDot.className = 'sync-status-dot is-offline';
-      if (catalogoElements.syncText) catalogoElements.syncText.textContent = 'Modo local (Sin conexión a Sheets)';
+      if (elements.syncDot) elements.syncDot.className = 'sync-status-dot is-offline';
+      if (elements.syncText) elements.syncText.textContent = 'Modo local (Sin conexión)';
       if (forzarRed) {
-        showToast('No se pudo conectar a Google Sheets. Mostrando datos locales.', 'info');
+        showToast('Sin conexión con Google Sheets. Mostrando datos locales.', 'info');
       }
     } finally {
-      if (catalogoElements.btnSync) catalogoElements.btnSync.classList.remove('is-spinning');
+      if (elements.btnSync) elements.btnSync.classList.remove('is-spinning');
       catalogoCargando = false;
     }
   }
 
   /**
    * ========================================================================
-   * ASIGNACIÓN DE EVENTOS
+   * ASIGNACIÓN DE EVENTOS GENERALES
    * ========================================================================
    */
 
-  // Navegación por pestañas
-  navTabs.forEach((tab) => {
-    tab.addEventListener('click', (e) => {
-      const targetTab = e.currentTarget.getAttribute('data-tab');
-      cambiarPestana(targetTab);
-    });
-  });
-
-  // Buscador del Catálogo
-  if (catalogoElements.busqueda) {
-    catalogoElements.busqueda.addEventListener('input', filtrarCatalogo);
+  // Buscador
+  if (elements.busqueda) {
+    elements.busqueda.addEventListener('input', filtrarCatalogo);
   }
 
-  if (catalogoElements.btnLimpiar) {
-    catalogoElements.btnLimpiar.addEventListener('click', () => {
-      catalogoElements.busqueda.value = '';
+  if (elements.btnLimpiar) {
+    elements.btnLimpiar.addEventListener('click', () => {
+      elements.busqueda.value = '';
       filtrarCatalogo();
-      catalogoElements.busqueda.focus();
+      elements.busqueda.focus();
     });
   }
 
-  if (catalogoElements.btnSync) {
-    catalogoElements.btnSync.addEventListener('click', () => {
-      cargarCatalogo(true);
-    });
+  if (elements.btnSync) {
+    elements.btnSync.addEventListener('click', () => cargarCatalogo(true));
   }
 
-  // Filtros de Categoría, Género y Estado del Catálogo
+  // Filtros
   const filterBtns = document.querySelectorAll('.catalog-filter-btn');
-  filterBtns.forEach((btn) => {
+  filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      const tipo = btn.getAttribute('data-filter'); // 'categoria' | 'genero' | 'estado'
-      const valor = btn.getAttribute('data-value'); // 'todos' | 'diseñador' | 'árabes' | 'hombre' | 'mujer' | 'disponibles' | 'agotados'
+      const tipo = btn.getAttribute('data-filter');
+      const valor = btn.getAttribute('data-value');
 
       if (tipo === 'categoria') {
         filtroCategoriaActivo = valor;
-        document.querySelectorAll('.catalog-filter-btn[data-filter="categoria"]').forEach((b) => {
+        document.querySelectorAll('.catalog-filter-btn[data-filter="categoria"]').forEach(b => {
           b.classList.toggle('is-active', b === btn);
         });
       } else if (tipo === 'genero') {
         filtroGeneroActivo = valor;
-        document.querySelectorAll('.catalog-filter-btn[data-filter="genero"]').forEach((b) => {
+        document.querySelectorAll('.catalog-filter-btn[data-filter="genero"]').forEach(b => {
           b.classList.toggle('is-active', b === btn);
         });
       } else if (tipo === 'estado') {
         filtroEstadoActivo = valor;
-        document.querySelectorAll('.catalog-filter-btn[data-filter="estado"]').forEach((b) => {
+        document.querySelectorAll('.catalog-filter-btn[data-filter="estado"]').forEach(b => {
           b.classList.toggle('is-active', b === btn);
         });
       }
@@ -1728,108 +1299,105 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Control de acordeón desplegable de filtros del catálogo
-  const btnToggleFiltros = document.getElementById('btn-toggle-filtros');
-  const panelFiltros = document.getElementById('catalog-filters-collapsible');
-  const toggleFiltrosArrow = document.getElementById('toggle-filtros-arrow');
-  const toggleFiltrosDot = document.getElementById('toggle-filtros-dot');
-
-  function actualizarIndicadorFiltrosActivos() {
-    const hayFiltrosActivos = (filtroCategoriaActivo !== 'todos') || (filtroGeneroActivo !== 'todos') || (filtroEstadoActivo !== 'todos');
-    if (toggleFiltrosDot) {
-      toggleFiltrosDot.style.display = hayFiltrosActivos ? 'inline-block' : 'none';
-    }
-    if (btnToggleFiltros) {
-      btnToggleFiltros.classList.toggle('has-active-filters', hayFiltrosActivos);
-    }
-  }
-
-  if (btnToggleFiltros && panelFiltros) {
-    btnToggleFiltros.addEventListener('click', () => {
-      const estaColapsado = panelFiltros.classList.contains('is-collapsed');
+  if (elements.btnToggleFiltros && elements.panelFiltros) {
+    elements.btnToggleFiltros.addEventListener('click', () => {
+      const estaColapsado = elements.panelFiltros.classList.contains('is-collapsed');
       if (estaColapsado) {
-        panelFiltros.classList.remove('is-collapsed');
-        btnToggleFiltros.classList.add('is-open');
-        btnToggleFiltros.setAttribute('aria-expanded', 'true');
-        if (toggleFiltrosArrow) toggleFiltrosArrow.textContent = '▲';
+        elements.panelFiltros.classList.remove('is-collapsed');
+        elements.btnToggleFiltros.classList.add('is-open');
+        elements.btnToggleFiltros.setAttribute('aria-expanded', 'true');
+        if (elements.toggleFiltrosArrow) elements.toggleFiltrosArrow.textContent = '▲';
       } else {
-        panelFiltros.classList.add('is-collapsed');
-        btnToggleFiltros.classList.remove('is-open');
-        btnToggleFiltros.setAttribute('aria-expanded', 'false');
-        if (toggleFiltrosArrow) toggleFiltrosArrow.textContent = '▼';
+        elements.panelFiltros.classList.add('is-collapsed');
+        elements.btnToggleFiltros.classList.remove('is-open');
+        elements.btnToggleFiltros.setAttribute('aria-expanded', 'false');
+        if (elements.toggleFiltrosArrow) elements.toggleFiltrosArrow.textContent = '▼';
       }
     });
   }
 
-  // Cálculo y sincronización en tiempo real
-  Object.entries(inputs).forEach(([key, input]) => {
-    if (!input) return;
-    if (key === 'cantidad') {
-      const onCantidadChange = () => {
-        const cant = Math.max(1, parseInt(inputs.cantidad.value, 10) || 1);
-        const configBase = obtenerConfigBase();
-        const costoPorPerfume = parseFloat(configBase.reempaque) || 1.00;
-        inputs.reempaque.value = (cant * costoPorPerfume).toFixed(2);
-        ejecutarCalculo();
-      };
-      input.addEventListener('input', onCantidadChange);
-      input.addEventListener('change', onCantidadChange);
-    } else {
-      input.addEventListener('input', ejecutarCalculo);
-      input.addEventListener('change', ejecutarCalculo);
-    }
-  });
-
-  // Sincronización en vivo del precio de caja en el modal de configuración
-  if (configInputs.costoCaja) {
-    configInputs.costoCaja.addEventListener('input', actualizarCostoCalculadoModal);
-    configInputs.costoCaja.addEventListener('change', actualizarCostoCalculadoModal);
+  // Eventos de apertura / cierre del carrito
+  if (elements.headerCartBtn) {
+    elements.headerCartBtn.addEventListener('click', abrirModalCarrito);
   }
 
-  // Botones del formulario
-  btnCalcular.addEventListener('click', () => {
-    ejecutarCalculo();
-    showToast('Cálculo actualizado', 'info');
-  });
+  if (elements.btnAbrirCarritoFlotante) {
+    elements.btnAbrirCarritoFlotante.addEventListener('click', abrirModalCarrito);
+  }
 
-  btnGuardar.addEventListener('click', guardarCotizacionActual);
-  btnNuevo.addEventListener('click', nuevaCotizacion);
-  btnLimpiar.addEventListener('click', limpiarDatos);
-  btnBorrarHistorial.addEventListener('click', borrarTodoHistorial);
+  if (elements.btnCerrarCarrito) {
+    elements.btnCerrarCarrito.addEventListener('click', cerrarModalCarrito);
+  }
 
-  // Sección Configuración (Modal)
-  if (btnAbrirConfig) btnAbrirConfig.addEventListener('click', abrirModalConfiguracion);
-  if (btnCerrarConfig) btnCerrarConfig.addEventListener('click', cerrarModalConfiguracion);
-  btnGuardarConfig.addEventListener('click', guardarConfiguracionBase);
-  btnRestaurarFabrica.addEventListener('click', restaurarValoresFabrica);
+  if (elements.btnSeguirComprando) {
+    elements.btnSeguirComprando.addEventListener('click', cerrarModalCarrito);
+  }
 
-  if (modalConfig) {
-    modalConfig.addEventListener('click', (e) => {
-      if (e.target === modalConfig) cerrarModalConfiguracion();
+  if (elements.btnVaciarCarrito) {
+    elements.btnVaciarCarrito.addEventListener('click', solicitarVaciarPedido);
+  }
+
+  if (elements.btnCerrarConfirmarVaciar) {
+    elements.btnCerrarConfirmarVaciar.addEventListener('click', cerrarModalConfirmarVaciar);
+  }
+
+  if (elements.btnCancelarVaciar) {
+    elements.btnCancelarVaciar.addEventListener('click', cerrarModalConfirmarVaciar);
+  }
+
+  if (elements.btnConfirmarVaciar) {
+    elements.btnConfirmarVaciar.addEventListener('click', vaciarPedido);
+  }
+
+  if (elements.modalConfirmarVaciar) {
+    elements.modalConfirmarVaciar.addEventListener('click', (e) => {
+      if (e.target === elements.modalConfirmarVaciar) cerrarModalConfirmarVaciar();
     });
   }
 
-  // Modal Detalle
-  btnCerrarModal.addEventListener('click', cerrarModal);
-  btnCerrarModalBottom.addEventListener('click', cerrarModal);
-  btnCargarModal.addEventListener('click', cargarItemEnFormulario);
-  modalDetalle.addEventListener('click', (e) => {
-    if (e.target === modalDetalle) cerrarModal();
-  });
+  if (elements.btnEnviarWhatsapp) {
+    elements.btnEnviarWhatsapp.addEventListener('click', (e) => {
+      if (elements.btnEnviarWhatsapp.disabled || elements.btnEnviarWhatsapp.classList.contains('is-disabled')) {
+        e.preventDefault();
+        return;
+      }
+      enviarPedidoWhatsApp();
+    });
+  }
+
+  if (elements.modalCarrito) {
+    elements.modalCarrito.addEventListener('click', (e) => {
+      if (e.target === elements.modalCarrito) cerrarModalCarrito();
+    });
+  }
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      if (modalDetalle.classList.contains('is-active')) cerrarModal();
-      if (modalConfig && modalConfig.classList.contains('is-active')) cerrarModalConfiguracion();
+      if (elements.modalConfirmarVaciar && elements.modalConfirmarVaciar.classList.contains('is-active')) {
+        cerrarModalConfirmarVaciar();
+        return;
+      }
+      if (elements.modalCarrito && elements.modalCarrito.classList.contains('is-active')) {
+        cerrarModalCarrito();
+      }
     }
   });
 
-  // Estado Online / Offline (Compatible con mini indicador y estándar)
+  // Guardar nombre del cliente en tiempo real al tipear
+  if (elements.inputClienteNombre) {
+    elements.inputClienteNombre.addEventListener('input', () => {
+      try {
+        localStorage.setItem(STORAGE_KEYS.CLIENTE_NOMBRE, elements.inputClienteNombre.value.trim());
+      } catch (e) {}
+    });
+  }
+
+  // Estado Online / Offline
   function actualizarEstadoConexion() {
-    if (!pwaStatus) return;
+    if (!elements.pwaStatus) return;
     const isOnline = navigator.onLine;
-    const pulse = pwaStatus.querySelector('.status-dot-mini, .status-pulse');
-    const label = pwaStatus.querySelector('.status-text-mini, .status-label');
+    const pulse = elements.pwaStatus.querySelector('.status-dot-mini');
+    const label = elements.pwaStatus.querySelector('.status-text-mini');
 
     if (pulse && label) {
       if (isOnline) {
@@ -1839,7 +1407,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         pulse.style.background = 'var(--gold-primary)';
         pulse.style.boxShadow = '0 0 6px var(--gold-primary)';
-        label.textContent = 'Offline (PWA)';
+        label.textContent = 'Offline';
       }
     }
   }
@@ -1848,28 +1416,26 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('offline', actualizarEstadoConexion);
   actualizarEstadoConexion();
 
-  // Registro del Service Worker para funcionamiento Offline y PWA (compatible GitHub Pages)
+  // Registro del Service Worker para funcionamiento PWA Offline
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./service-worker.js')
-        .then((reg) => {
-          console.log('[DUNES PWA] Service Worker registrado con éxito:', reg.scope);
+        .then(reg => {
+          console.log('[GL EXPRESS] Service Worker registrado con éxito:', reg.scope);
         })
-        .catch((err) => {
-          console.log('[DUNES PWA] Error al registrar Service Worker:', err);
+        .catch(err => {
+          console.warn('[GL EXPRESS] Error al registrar Service Worker:', err);
         });
     });
   }
 
-  // ========================================================================
-  // ARRANQUE DE LA APLICACIÓN
-  // REQUISITO CRÍTICO: La pantalla inicial SIEMPRE será el Cotizador.
-  // ========================================================================
-  cargarValoresIniciales();
-  ejecutarCalculo();
-  renderizarHistorial();
+  /**
+   * ========================================================================
+   * ARRANQUE DE LA APLICACIÓN MAYORISTA
+   * ========================================================================
+   */
+  cargarCarrito();
   cargarCatalogo(false);
-  cambiarPestana('cotizador'); // Pantalla inicial garantizada: Cotizador
 
-  console.log('[DUNES PARFUMS] Inicializado. Módulo principal activo: Cotizador.');
+  console.log('[GL EXPRESS] Plataforma Mayorista Inicializada con éxito.');
 });

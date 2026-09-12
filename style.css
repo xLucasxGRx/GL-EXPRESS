@@ -1478,10 +1478,10 @@ body {
    ========================================================================== */
 .toast-container {
   position: fixed;
-  bottom: 24px;
+  top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000;
+  z-index: 2500;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -1490,32 +1490,48 @@ body {
   max-width: 380px;
 }
 
-.toast {
-  background: var(--bg-card-solid);
-  border: 1px solid var(--gold-border);
+.toast,
+.toast-item {
+  background: rgba(22, 17, 14, 0.95);
+  border: 1px solid var(--border-subtle);
   color: var(--text-primary);
-  padding: 0.85rem 1.15rem;
-  border-radius: var(--radius-lg);
-  font-size: 0.88rem;
-  font-weight: 500;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px var(--gold-glow);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(212, 167, 59, 0.2);
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  animation: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: toastSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes toastSlideUp {
-  0% { transform: translateY(20px); opacity: 0; }
+@keyframes toastSlideDown {
+  0% { transform: translateY(-20px); opacity: 0; }
   100% { transform: translateY(0); opacity: 1; }
 }
 
-.toast-success {
-  border-color: rgba(16, 185, 129, 0.4);
+@keyframes toastSlideOut {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-20px); opacity: 0; }
 }
 
-.toast-success .toast-icon {
-  color: var(--emerald-profit);
+.toast-item.toast-success {
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #a7f3d0;
+}
+
+.toast-item.toast-error {
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fca5a5;
+}
+
+.toast-item.toast-info {
+  border-color: rgba(212, 167, 59, 0.5);
+  color: var(--gold-light);
 }
 
 /* ==========================================================================
@@ -2473,6 +2489,1026 @@ body {
   font-size: 0.8rem;
   color: var(--text-muted);
   max-width: 320px;
+}
+
+/* ==========================================================================
+   GL EXPRESS — ESTILOS DEL CATÁLOGO MAYORISTA & CARRITO
+   ========================================================================== */
+
+/* Brand Monogram */
+.brand-gl-badge {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--gold-light);
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 10px rgba(212, 167, 59, 0.5);
+}
+
+.splash-logo-badge {
+  font-family: var(--font-serif);
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--gold-light);
+  letter-spacing: 0.1em;
+  text-shadow: 0 0 16px rgba(212, 167, 59, 0.6);
+}
+
+.btn-header-cart {
+  background: rgba(26, 21, 18, 0.85);
+  border: 1px solid rgba(212, 167, 59, 0.3);
+  border-radius: var(--radius-md);
+  padding: 0.35rem 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: var(--transition);
+}
+
+.btn-header-cart:hover {
+  border-color: var(--gold-primary);
+  background: rgba(35, 28, 22, 0.95);
+}
+
+.header-cart-icon {
+  font-size: 1rem;
+}
+
+.header-cart-count {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--gold-gradient);
+  color: #08070a;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  line-height: 1.2;
+}
+
+/* Grid del Catálogo Mayorista — 2 Columnas Móvil First */
+.catalogo-mayorista-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.55rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (min-width: 480px) {
+  .catalogo-mayorista-grid {
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .catalogo-mayorista-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.9rem;
+    max-width: 820px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .catalogo-mayorista-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    max-width: 860px;
+  }
+}
+
+/* Tarjeta Mayorista Compacta en 2 Columnas */
+.wholesale-card {
+  background: linear-gradient(145deg, rgba(22, 18, 15, 0.98), rgba(14, 11, 9, 0.98));
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.5rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.4rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), 0 0 1px rgba(212, 167, 59, 0.15);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.wholesale-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(212, 175, 55, 0.45);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.6), 0 0 14px rgba(212, 167, 59, 0.18);
+}
+
+.wholesale-card.is-agotado {
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Imagen Mayorista: 75-85px para 2 Columnas */
+.wholesale-img-wrapper {
+  position: relative;
+  width: 82px;
+  height: 82px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+@media (min-width: 480px) {
+  .wholesale-img-wrapper {
+    width: 90px;
+    height: 90px;
+  }
+}
+
+.wholesale-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.6));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.wholesale-img.is-loaded {
+  opacity: 1;
+}
+
+/* Título de Perfume: Máximo 2 Líneas */
+.wholesale-title-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.15rem;
+  padding: 0 0.15rem;
+}
+
+.wholesale-title {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.22;
+  margin: 0;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+
+@media (min-width: 480px) {
+  .wholesale-title {
+    font-size: 0.82rem;
+  }
+}
+
+/* Indicador de Agotado en Título */
+.card-agotado-badge {
+  display: inline-block;
+  color: #ef4444;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  margin-left: 0.2rem;
+  padding: 0.04rem 0.25rem;
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 3px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* Bloque de Precio: PUESTO EN PERÚ */
+.wholesale-pricing-block {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  border-radius: var(--radius-sm);
+  padding: 0.32rem 0.35rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.wholesale-price-lbl {
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold-primary);
+  line-height: 1.1;
+}
+
+.wholesale-price-peru {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(212, 167, 59, 0.3);
+  line-height: 1.15;
+}
+
+@media (min-width: 480px) {
+  .wholesale-price-peru {
+    font-size: 1.12rem;
+  }
+}
+
+/* Stepper y Botón Agregar */
+.wholesale-actions-row {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.32rem;
+  margin-top: 0.05rem;
+}
+
+.wholesale-stepper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(14, 11, 9, 0.95);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  width: 100%;
+  max-width: 104px;
+  height: 28px;
+}
+
+.stepper-btn {
+  background: transparent;
+  border: none;
+  color: var(--gold-light);
+  font-size: 1rem;
+  font-weight: 700;
+  width: 30px;
+  height: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+  user-select: none;
+  padding: 0;
+}
+
+.stepper-btn:hover {
+  background: rgba(212, 167, 59, 0.2);
+}
+
+.stepper-btn:active {
+  background: rgba(212, 167, 59, 0.35);
+}
+
+.stepper-val {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+  flex: 1;
+  text-align: center;
+  user-select: none;
+}
+
+/* Botón Agregar al pedido Adaptado a 2 Columnas */
+.btn-add-wholesale {
+  width: 100%;
+  background: var(--gold-gradient);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #08070a;
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.42rem 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(212, 167, 59, 0.22);
+  white-space: nowrap;
+}
+
+.btn-add-full {
+  display: none;
+}
+
+.btn-add-short {
+  display: inline;
+}
+
+@media (min-width: 600px) {
+  .btn-add-short {
+    display: none;
+  }
+  .btn-add-full {
+    display: inline;
+  }
+}
+
+.btn-add-wholesale:hover {
+  background: var(--gold-gradient-hover);
+  box-shadow: 0 6px 16px rgba(212, 167, 59, 0.38);
+  transform: translateY(-1px);
+}
+
+.btn-add-wholesale:active {
+  transform: scale(0.97);
+}
+
+/* Deshabilitado para Agotado */
+.wholesale-card.is-agotado .wholesale-stepper,
+.wholesale-card.is-agotado .btn-add-wholesale {
+  opacity: 0.38;
+  pointer-events: none;
+  filter: grayscale(0.85);
+}
+
+/* Barra Flotante de Carrito */
+.floating-cart-bar {
+  position: fixed;
+  bottom: max(0.85rem, env(safe-area-inset-bottom, 0.85rem));
+  left: 0;
+  right: 0;
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  padding: 0 0.85rem;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+.floating-cart-bar.is-hidden {
+  transform: translateY(140%);
+  opacity: 0;
+}
+
+.floating-cart-btn {
+  pointer-events: auto;
+  width: 100%;
+  max-width: 520px;
+  background: linear-gradient(135deg, rgba(30, 24, 18, 0.97) 0%, rgba(16, 13, 10, 0.98) 100%);
+  border: 1.5px solid var(--gold-primary);
+  border-radius: 999px;
+  padding: 0.65rem 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85), 0 0 20px rgba(212, 167, 59, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: var(--transition);
+}
+
+.floating-cart-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.92), 0 0 26px rgba(212, 167, 59, 0.5);
+  border-color: var(--gold-light);
+}
+
+.floating-cart-btn:active {
+  transform: scale(0.98);
+}
+
+.floating-cart-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.floating-cart-icon {
+  font-size: 1.15rem;
+}
+
+.floating-cart-text {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.floating-cart-badge {
+  background: var(--gold-gradient);
+  color: #08070a;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  line-height: 1.2;
+}
+
+.floating-cart-right {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.floating-cart-total {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--gold-light);
+}
+
+.floating-cart-arrow {
+  font-size: 1.1rem;
+  color: var(--gold-light);
+  line-height: 1;
+}
+
+/* Modal Carrito / Pedido Mayorista — Estructura 3 Zonas */
+.modal-carrito-card {
+  max-width: 520px;
+  height: 85vh;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 1. Header Fijo */
+.modal-carrito-header {
+  flex-shrink: 0;
+  padding: 1rem 1.25rem 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-card-solid);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.modal-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.cart-client-field {
+  margin-bottom: 0;
+}
+
+.cart-client-field label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.3rem;
+}
+
+.cart-client-field input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-md);
+  padding: 0.52rem 0.8rem;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  outline: none;
+  transition: var(--transition);
+  box-sizing: border-box;
+}
+
+.cart-client-field input:focus {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 10px var(--gold-glow);
+}
+
+/* 2. Zona Central: Lista de Productos con Scroll Independiente */
+.modal-carrito-body {
+  flex: 1 1 auto;
+  min-height: 0; /* Imprescindible para flex scrolling en navegadores */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 167, 59, 0.38) rgba(14, 11, 9, 0.6);
+}
+
+.modal-carrito-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-carrito-body::-webkit-scrollbar-track {
+  background: rgba(14, 11, 9, 0.6);
+  border-radius: 4px;
+}
+
+.modal-carrito-body::-webkit-scrollbar-thumb {
+  background: rgba(212, 167, 59, 0.38);
+  border-radius: 4px;
+}
+
+.modal-carrito-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 167, 59, 0.65);
+}
+
+.carrito-items-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.cart-item-row {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 0.6rem;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(212, 167, 59, 0.15);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.65rem;
+}
+
+.cart-item-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(212, 167, 59, 0.2);
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.cart-item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.cart-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.cart-item-name {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cart-item-unit-price {
+  font-size: 0.7rem;
+  color: var(--gold-light);
+}
+
+.cart-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cart-item-stepper {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(14, 11, 9, 0.95);
+  border: 1px solid rgba(212, 167, 59, 0.25);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  height: 28px;
+}
+
+.cart-item-stepper button {
+  background: transparent;
+  border: none;
+  color: var(--gold-light);
+  font-size: 0.9rem;
+  font-weight: 700;
+  width: 24px;
+  height: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.cart-item-stepper button:hover {
+  background: rgba(212, 167, 59, 0.2);
+}
+
+.cart-item-stepper span {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ffffff;
+  padding: 0 0.35rem;
+  min-width: 18px;
+  text-align: center;
+}
+
+.cart-item-subtotal {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #ffffff;
+  min-width: 60px;
+  text-align: right;
+}
+
+.cart-item-delete {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 0.9rem;
+  opacity: 0.7;
+  padding: 0.2rem;
+  transition: opacity 0.15s ease;
+}
+
+.cart-item-delete:hover {
+  opacity: 1;
+}
+
+.carrito-empty-state {
+  text-align: center;
+  padding: 2rem 1rem;
+  background: rgba(22, 18, 15, 0.5);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+}
+
+.carrito-empty-icon {
+  font-size: 2rem;
+  margin-bottom: 0.2rem;
+  opacity: 0.7;
+}
+
+.carrito-empty-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.carrito-empty-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.cart-summary-box {
+  background: rgba(26, 21, 18, 0.85);
+  border: 1px solid rgba(212, 167, 59, 0.2);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0;
+}
+
+.cart-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.cart-summary-row.cart-total-row {
+  border-top: 1px solid rgba(212, 167, 59, 0.18);
+  padding-top: 0.4rem;
+  margin-top: 0.2rem;
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.cart-total-soles {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--gold-light);
+  text-shadow: 0 0 10px rgba(212, 167, 59, 0.35);
+}
+
+/* 3. Zona Inferior Fija: Resumen y Acciones */
+.modal-carrito-footer {
+  flex-shrink: 0;
+  padding: 0.75rem 1.25rem 1rem 1.25rem;
+  background: rgba(18, 14, 12, 0.98);
+  border-top: 1px solid var(--border-subtle);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.modal-carrito-footer .cart-min-warning-alert {
+  margin-top: 0;
+}
+
+.btn-whatsapp-order {
+  width: 100%;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  font-weight: 700;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+  transition: var(--transition);
+}
+
+.btn-whatsapp-order:hover {
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  box-shadow: 0 8px 26px rgba(16, 185, 129, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-whatsapp-order:active {
+  transform: scale(0.98);
+}
+
+.whatsapp-btn-icon {
+  font-size: 1.1rem;
+}
+
+.cart-secondary-actions {
+  display: flex;
+  gap: 0.45rem;
+  width: 100%;
+}
+
+.cart-secondary-actions .btn {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* ==========================================================================
+   ALERTA DE PEDIDO MÍNIMO MAYORISTA & BOTÓN WHATSAPP BLOQUEADO
+   ========================================================================== */
+
+.cart-min-warning-alert {
+  margin-top: 0.6rem;
+  padding: 0.75rem 0.9rem;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.38);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  animation: fadeIn 0.2s ease;
+}
+
+.cart-min-warning-alert .warning-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.cart-min-warning-alert .warning-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.cart-min-warning-alert .warning-title {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f87171;
+  line-height: 1.2;
+}
+
+.cart-min-warning-alert .warning-desc {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: #fca5a5;
+  line-height: 1.2;
+}
+
+/* Estado del botón WhatsApp cuando tiene menos de 6 unidades o productos agotados */
+.btn-whatsapp-order:disabled,
+.btn-whatsapp-order.is-disabled {
+  background: rgba(239, 68, 68, 0.16) !important;
+  border: 1px solid rgba(239, 68, 68, 0.45) !important;
+  color: #fca5a5 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+  pointer-events: none !important;
+  opacity: 0.9;
+}
+
+.btn-whatsapp-order:disabled:hover,
+.btn-whatsapp-order.is-disabled:hover {
+  background: rgba(239, 68, 68, 0.16) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* ==========================================================================
+   PRODUCTO AGOTADO DENTRO DEL CARRITO
+   ========================================================================== */
+
+.cart-item-row.is-item-agotado {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  border-radius: var(--radius-md);
+  opacity: 0.88;
+  position: relative;
+}
+
+.cart-item-info-agotado {
+  gap: 0.3rem !important;
+}
+
+.cart-item-name-agotado {
+  color: #fca5a5 !important;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.agotado-dot {
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.cart-item-badge-agotado {
+  display: inline-block;
+  background: rgba(239, 68, 68, 0.22);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #f87171;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.6px;
+  width: fit-content;
+}
+
+.cart-item-notice-agotado {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  color: #fca5a5;
+  font-style: italic;
+  line-height: 1.2;
+}
+
+.cart-item-controls-agotado {
+  justify-content: flex-end;
+}
+
+.btn-cart-delete-agotado {
+  background: rgba(239, 68, 68, 0.16);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.4rem 0.7rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: var(--transition);
+}
+
+.btn-cart-delete-agotado:hover {
+  background: rgba(239, 68, 68, 0.35);
+  color: #ffffff;
+  border-color: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+/* ==========================================================================
+   MODAL DE CONFIRMACIÓN PARA VACIAR CARRITO
+   ========================================================================== */
+
+.modal-confirmar-card {
+  max-width: 400px;
+  margin: auto;
+  border: 1px solid var(--gold-border);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 167, 59, 0.15);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.modal-header-compact {
+  padding: 1rem 1.25rem;
+}
+
+.modal-body-compact {
+  padding: 1.2rem 1.25rem;
+}
+
+.modal-confirm-desc {
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.modal-footer-confirm {
+  padding: 1rem 1.25rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.modal-footer-confirm .btn {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.btn-danger-glow {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(248, 113, 113, 0.5) !important;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4) !important;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-danger-glow:hover {
+  background: linear-gradient(135deg, #f87171 0%, #dc2626 100%) !important;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6) !important;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   ADAPTACIONES MÓVIL CARRITO MAYORISTA (3 ZONAS & 85VH)
+   ========================================================================== */
+@media (max-width: 580px) {
+  .modal-carrito-card {
+    height: 85vh;
+    max-height: 85vh;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    width: 100%;
+  }
+
+  .modal-carrito-header {
+    padding: 0.85rem 1rem 0.65rem 1rem;
+  }
+
+  .modal-carrito-body {
+    padding: 0.75rem 1rem;
+  }
+
+  .modal-carrito-footer {
+    padding: 0.65rem 1rem max(0.85rem, env(safe-area-inset-bottom, 0.85rem)) 1rem;
+  }
 }
 
 
