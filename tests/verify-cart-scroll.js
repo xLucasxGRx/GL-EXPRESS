@@ -100,41 +100,37 @@ async function run() {
   await send('DOM.enable');
 
   await send('Page.navigate', { url: `http://localhost:${PORT}/index.html` });
-  await new Promise(r => setTimeout(r, 2000));
+  await new Promise(r => setTimeout(r, 2500));
 
   const artifactDir = 'C:\\Users\\Lucas\\.gemini\\antigravity-ide\\brain\\de6a0aec-eaab-4397-b454-68cf4b120458';
 
-  console.log('\n--- Inyectando múltiples productos al carrito para verificar Scroll Independiente ---');
-  await send('Runtime.evaluate', {
+  console.log('\n--- Agregando 8 productos reales del catálogo para probar Scroll Independiente ---');
+  const addResult = await send('Runtime.evaluate', {
     expression: `
       (() => {
         localStorage.removeItem('glexpress_carrito_v1');
-        const items = [
-          { id: 'item-1', producto: 'Club de Nuit Intense Man 3.6 Oz Edt', puestoPeru: 155.00, cantidad: 2, imagen: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=300' },
-          { id: 'item-2', producto: 'Hawas for Men Rasasi 3.4 Oz Edp', puestoPeru: 195.00, cantidad: 1, imagen: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=300' },
-          { id: 'item-3', producto: 'Yara Lattafa 3.4 Oz Edp Women', puestoPeru: 120.00, cantidad: 2, imagen: 'https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=300' },
-          { id: 'item-4', producto: 'Khamrah Lattafa 3.4 Oz Edp Unisex', puestoPeru: 165.00, cantidad: 1, imagen: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?w=300' },
-          { id: 'item-5', producto: 'Asad Lattafa 3.4 Oz Edp Men', puestoPeru: 125.00, cantidad: 2, imagen: 'https://images.unsplash.com/photo-1615397349754-cfa2066a298e?w=300' },
-          { id: 'item-6', producto: 'Bade\'e Al Oud Oud for Glory 3.4 Oz', puestoPeru: 140.00, cantidad: 1, imagen: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=300' },
-          { id: 'item-7', producto: '9pm Afnan 3.4 Oz Edp Men', puestoPeru: 145.00, cantidad: 2, imagen: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=300' },
-          { id: 'item-8', producto: 'Nautica Voyage 3.4 Oz Edt Men', puestoPeru: 95.00, cantidad: 3, imagen: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=300' }
-        ];
-        localStorage.setItem('glexpress_carrito_v1', JSON.stringify(items));
-        location.reload();
-      })()
-    `
-  });
-  await new Promise(r => setTimeout(r, 2000));
+        const cards = Array.from(document.querySelectorAll('.wholesale-card:not(.is-agotado)'));
+        const addedNames = [];
+        const countToAdd = Math.min(cards.length, 8);
 
-  // Abrir carrito
-  await send('Runtime.evaluate', {
-    expression: `
-      (() => {
+        for (let i = 0; i < countToAdd; i++) {
+          const btn = cards[i].querySelector('.btn-add-wholesale');
+          const title = cards[i].querySelector('.wholesale-title')?.textContent?.trim();
+          if (btn) {
+            btn.click();
+            addedNames.push(title);
+          }
+        }
+
         const btnAbrir = document.getElementById('btn-abrir-carrito-flotante');
         if (btnAbrir) btnAbrir.click();
+
+        return { cardsFound: cards.length, addedCount: addedNames.length, addedNames };
       })()
-    `
+    `,
+    returnByValue: true
   });
+  console.log('Productos agregados al carrito:', addResult.result.value);
   await new Promise(r => setTimeout(r, 600));
 
   // Verificar métricas de layout
@@ -149,6 +145,7 @@ async function run() {
         const btnWA = document.getElementById('btn-enviar-whatsapp');
         const totalUnidades = document.getElementById('cart-total-unidades')?.textContent?.trim();
         const clientField = document.querySelector('.modal-carrito-header .cart-client-field');
+        const cartItems = document.querySelectorAll('#carrito-lista-items .cart-item-row');
 
         const windowHeight = window.innerHeight;
         const cardHeight = card.offsetHeight;
@@ -162,7 +159,7 @@ async function run() {
         return {
           windowHeight,
           cardHeight,
-          maxAllowedHeight: windowHeight * 0.86,
+          maxAllowedHeight: Math.ceil(windowHeight * 0.85) + 2,
           headerHeight,
           bodyHeight,
           bodyScrollHeight,
@@ -170,6 +167,7 @@ async function run() {
           footerHeight,
           hasClientInHeader: !!clientField,
           totalUnidades,
+          cartItemsCount: cartItems.length,
           btnWAIsFixed: !!btnWA && !!footer.contains(btnWA)
         };
       })()
@@ -184,7 +182,18 @@ async function run() {
   assert.ok(m.bodyHasScroll, `La zona central de productos debe tener scroll independiente (scrollHeight: ${m.bodyScrollHeight}px > height: ${m.bodyHeight}px)`);
   assert.ok(m.hasClientInHeader, 'El campo Cliente / Negocio debe estar dentro del Header fijo');
   assert.ok(m.btnWAIsFixed, 'El botón de WhatsApp y resumen deben estar fijos en el Footer');
+  assert.strictEqual(m.cartItemsCount, 8, 'Deben haber 8 filas de productos en el carrito');
   console.log('✔ Verificación geométrica de 3 Zonas superada: Header fijo, Cuerpo con scroll independiente, Footer fijo.');
+
+  // Dismiss all toasts before screenshots
+  await send('Runtime.evaluate', {
+    expression: `
+      (() => {
+        document.querySelectorAll('.toast, .toast-notification, [id*="toast"]').forEach(el => el.remove());
+      })()
+    `
+  });
+  await new Promise(r => setTimeout(r, 200));
 
   // Captura 1: Vista Superior (Top del scroll)
   const shot1 = await send('Page.captureScreenshot', { format: 'png' });
@@ -192,12 +201,12 @@ async function run() {
   console.log('✔ Screenshot guardado: cart_scroll_top.png');
 
   // Realizar scroll hacia abajo en la zona central
-  console.log('\n--- Realizando scroll en .modal-carrito-body ---');
+  console.log('\n--- Realizando scroll en .modal-carrito-body hacia abajo ---');
   await send('Runtime.evaluate', {
     expression: `
       (() => {
         const body = document.querySelector('.modal-carrito-body');
-        body.scrollTop = 250;
+        body.scrollTop = 220;
       })()
     `
   });
@@ -225,6 +234,39 @@ async function run() {
   const shot2 = await send('Page.captureScreenshot', { format: 'png' });
   fs.writeFileSync(path.join(artifactDir, 'cart_scroll_middle.png'), Buffer.from(shot2.data, 'base64'));
   console.log('✔ Screenshot guardado: cart_scroll_middle.png');
+
+  // 3. Probar en resolución Desktop (1280x800)
+  console.log('\n--- Probando visualización en Desktop (1280x800) ---');
+  await send('Emulation.setDeviceMetricsOverride', {
+    width: 1280,
+    height: 800,
+    deviceScaleFactor: 1,
+    mobile: false
+  });
+  await new Promise(r => setTimeout(r, 400));
+
+  const desktopMetrics = await send('Runtime.evaluate', {
+    expression: `
+      (() => {
+        const card = document.querySelector('.modal-carrito-card');
+        const body = document.querySelector('.modal-carrito-body');
+        return {
+          cardWidth: card.offsetWidth,
+          cardHeight: card.offsetHeight,
+          windowHeight: window.innerHeight,
+          maxAllowedHeight: Math.ceil(window.innerHeight * 0.85) + 2,
+          bodyHasScroll: body.scrollHeight > body.offsetHeight
+        };
+      })()
+    `,
+    returnByValue: true
+  });
+  console.log('Métricas Desktop:', desktopMetrics.result.value);
+  assert.ok(desktopMetrics.result.value.cardHeight <= desktopMetrics.result.value.maxAllowedHeight, 'En Desktop también respeta 85vh');
+
+  const shot3 = await send('Page.captureScreenshot', { format: 'png' });
+  fs.writeFileSync(path.join(artifactDir, 'cart_scroll_desktop.png'), Buffer.from(shot3.data, 'base64'));
+  console.log('✔ Screenshot guardado: cart_scroll_desktop.png');
 
   edgeProcess.kill();
   server.close();
