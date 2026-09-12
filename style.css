@@ -2940,63 +2940,30 @@ body {
   line-height: 1;
 }
 
-/* Modal Carrito / Pedido Mayorista — Estructura 3 Zonas */
+/* Modal Carrito / Pedido Mayorista — Estructura 3 Zonas (App Screen 95vh) */
 .modal-carrito-card {
-  max-width: 520px;
-  height: 85vh;
-  max-height: 85vh;
+  max-width: 540px;
+  height: 95vh;
+  max-height: 95vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
 
-/* 1. Header Fijo */
+/* 1. Header Fijo Compacto */
 .modal-carrito-header {
   flex-shrink: 0;
-  padding: 1rem 1.25rem 0.75rem 1.25rem;
+  padding: 0.85rem 1.25rem;
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-card-solid);
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
 }
 
 .modal-header-top {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   width: 100%;
-}
-
-.cart-client-field {
-  margin-bottom: 0;
-}
-
-.cart-client-field label {
-  display: block;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 0.3rem;
-}
-
-.cart-client-field input {
-  width: 100%;
-  background: var(--bg-input);
-  border: 1px solid var(--gold-border);
-  border-radius: var(--radius-md);
-  padding: 0.52rem 0.8rem;
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: 0.82rem;
-  outline: none;
-  transition: var(--transition);
-  box-sizing: border-box;
-}
-
-.cart-client-field input:focus {
-  border-color: var(--gold-primary);
-  box-shadow: 0 0 10px var(--gold-glow);
 }
 
 /* 2. Zona Central: Lista de Productos con Scroll Independiente */
@@ -3043,21 +3010,22 @@ body {
 
 .cart-item-row {
   display: grid;
-  grid-template-columns: 44px 1fr auto;
-  gap: 0.6rem;
+  grid-template-columns: 48px 1fr auto;
+  gap: 0.7rem;
   align-items: center;
-  background: rgba(0, 0, 0, 0.32);
-  border: 1px solid rgba(212, 167, 59, 0.15);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(212, 167, 59, 0.16);
   border-radius: var(--radius-md);
-  padding: 0.5rem 0.65rem;
+  padding: 0.55rem 0.75rem;
+  transition: var(--transition);
 }
 
 .cart-item-thumb {
-  width: 44px;
-  height: 44px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(212, 167, 59, 0.2);
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(212, 167, 59, 0.22);
   padding: 2px;
   display: flex;
   align-items: center;
@@ -3488,18 +3456,18 @@ body {
 }
 
 /* ==========================================================================
-   ADAPTACIONES MÓVIL CARRITO MAYORISTA (3 ZONAS & 85VH)
+   ADAPTACIONES MÓVIL CARRITO MAYORISTA (3 ZONAS & 95VH)
    ========================================================================== */
 @media (max-width: 580px) {
   .modal-carrito-card {
-    height: 85vh;
-    max-height: 85vh;
+    height: 95vh;
+    max-height: 95vh;
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     width: 100%;
   }
 
   .modal-carrito-header {
-    padding: 0.85rem 1rem 0.65rem 1rem;
+    padding: 0.75rem 1rem;
   }
 
   .modal-carrito-body {

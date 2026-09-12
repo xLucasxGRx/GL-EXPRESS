@@ -159,7 +159,8 @@ async function run() {
         return {
           windowHeight,
           cardHeight,
-          maxAllowedHeight: Math.ceil(windowHeight * 0.85) + 2,
+          minAllowedHeight: Math.floor(windowHeight * 0.90),
+          maxAllowedHeight: Math.ceil(windowHeight * 0.95) + 2,
           headerHeight,
           bodyHeight,
           bodyScrollHeight,
@@ -176,14 +177,15 @@ async function run() {
   });
 
   const m = layoutMetrics.result.value;
-  console.log('Métricas de Layout 3 Zonas:', m);
+  console.log('Métricas de Layout 3 Zonas (Pantalla Completa 95vh):', m);
 
-  assert.ok(m.cardHeight <= m.maxAllowedHeight, `La tarjeta del carrito (${m.cardHeight}px) no debe superar el 85vh (${m.maxAllowedHeight}px)`);
+  assert.ok(m.cardHeight >= m.minAllowedHeight && m.cardHeight <= m.maxAllowedHeight, `La tarjeta del carrito (${m.cardHeight}px) debe ocupar entre 90vh y 95vh (${m.minAllowedHeight}-${m.maxAllowedHeight}px)`);
   assert.ok(m.bodyHasScroll, `La zona central de productos debe tener scroll independiente (scrollHeight: ${m.bodyScrollHeight}px > height: ${m.bodyHeight}px)`);
-  assert.ok(m.hasClientInHeader, 'El campo Cliente / Negocio debe estar dentro del Header fijo');
+  assert.strictEqual(m.hasClientInHeader, false, 'El campo Cliente / Negocio debe haber sido completamente eliminado');
+  assert.ok(m.headerHeight <= 100, `El header debe ser compacto (<= 100px, actual: ${m.headerHeight}px)`);
   assert.ok(m.btnWAIsFixed, 'El botón de WhatsApp y resumen deben estar fijos en el Footer');
   assert.strictEqual(m.cartItemsCount, 8, 'Deben haber 8 filas de productos en el carrito');
-  console.log('✔ Verificación geométrica de 3 Zonas superada: Header fijo, Cuerpo con scroll independiente, Footer fijo.');
+  console.log('✔ Verificación geométrica de 3 Zonas superada: 95vh, Header compacto sin campo cliente, Cuerpo amplio con scroll independiente, Footer fijo.');
 
   // Dismiss all toasts before screenshots
   await send('Runtime.evaluate', {
@@ -254,7 +256,8 @@ async function run() {
           cardWidth: card.offsetWidth,
           cardHeight: card.offsetHeight,
           windowHeight: window.innerHeight,
-          maxAllowedHeight: Math.ceil(window.innerHeight * 0.85) + 2,
+          minAllowedHeight: Math.floor(window.innerHeight * 0.90),
+          maxAllowedHeight: Math.ceil(window.innerHeight * 0.95) + 2,
           bodyHasScroll: body.scrollHeight > body.offsetHeight
         };
       })()
@@ -262,7 +265,7 @@ async function run() {
     returnByValue: true
   });
   console.log('Métricas Desktop:', desktopMetrics.result.value);
-  assert.ok(desktopMetrics.result.value.cardHeight <= desktopMetrics.result.value.maxAllowedHeight, 'En Desktop también respeta 85vh');
+  assert.ok(desktopMetrics.result.value.cardHeight <= desktopMetrics.result.value.maxAllowedHeight, 'En Desktop también respeta 95vh');
 
   const shot3 = await send('Page.captureScreenshot', { format: 'png' });
   fs.writeFileSync(path.join(artifactDir, 'cart_scroll_desktop.png'), Buffer.from(shot3.data, 'base64'));
