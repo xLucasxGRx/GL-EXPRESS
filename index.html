@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#08070a">
+  <meta name="description" content="DUNES PARFUMS - Calculadora y cotizador profesional de importación de perfumes USA a Perú por Courier.">
+  
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DUNES PARFUMS">
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="shortcut icon" href="./favicon.ico">
+  <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./assets/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="./assets/icon-512.png">
+
+  <title>DUNES PARFUMS — Cotizador Courier USA → Perú</title>
+
+  <!-- Google Fonts: Cinzel (Títulos de Lujo) y Outfit (Números y Textos) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./style.css?v=2.4">
+</head>
+<body>
+
+  <!-- Pantalla de Carga de Bienvenida (Splash Screen de Lujo) -->
+  <div id="app-splash-screen" class="app-splash" aria-hidden="true">
+    <div class="splash-content">
+      <div class="splash-logo-wrapper">
+        <img src="./assets/logocotizador.png" alt="DUNES PARFUMS" class="splash-logo-img">
+      </div>
+      <span class="splash-brand-title">DUNES PARFUMS</span>
+      <span class="splash-brand-subtitle">COTIZADOR COURIER USA → PERÚ</span>
+      <div class="splash-loader-bar">
+        <div class="splash-loader-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header Principal Minimalista de Lujo -->
+    <header class="app-header">
+      <div class="header-brand-group">
+        <div class="brand-logo-container">
+          <img src="./assets/logocotizador.png" alt="DUNES PARFUMS" class="brand-logo-img">
+        </div>
+        <div class="brand-text-container">
+          <h1 class="brand-title">DUNES PARFUMS</h1>
+          <p class="brand-tagline">Cotizador Courier USA 🇺🇸 → Perú 🇵🇪</p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div id="pwa-status" class="status-indicator-mini" title="Estado de la aplicación">
+          <span class="status-dot-mini"></span>
+          <span class="status-text-mini">Online</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Menú de Navegación Principal -->
+    <nav class="app-nav-tabs" role="tablist" aria-label="Navegación principal">
+      <button class="nav-tab is-active" id="tab-btn-cotizador" role="tab" aria-selected="true" aria-controls="vista-cotizador" data-tab="cotizador">
+        <span class="tab-icon">⚡</span>
+        <span class="tab-label">Cotizador</span>
+      </button>
+      <button class="nav-tab" id="tab-btn-catalogo" role="tab" aria-selected="false" aria-controls="vista-catalogo" data-tab="catalogo">
+        <span class="tab-icon">📖</span>
+        <span class="tab-label">Catálogo</span>
+      </button>
+      <button class="nav-tab" id="tab-btn-cotizaciones" role="tab" aria-selected="false" aria-controls="vista-cotizaciones" data-tab="cotizaciones">
+        <span class="tab-icon">📋</span>
+        <span class="tab-label">Cotizaciones</span>
+      </button>
+      <button class="nav-tab" id="tab-btn-configuracion" role="tab" aria-selected="false" data-tab="configuracion">
+        <span class="tab-icon">⚙️</span>
+        <span class="tab-label">Configuración</span>
+      </button>
+    </nav>
+
+    <main class="app-main">
+      <!-- VISTA 1: COTIZADOR (MÓDULO PRINCIPAL / PANTALLA INICIAL) -->
+      <div id="vista-cotizador" class="app-view is-active">
+        <!-- Sección Formulario: NUEVA COTIZACIÓN -->
+        <section class="section-card form-section" id="seccion-formulario">
+        <div class="section-header">
+          <div class="section-title-wrapper">
+            <span class="section-icon">📦</span>
+            <h2 class="section-title">NUEVA COTIZACIÓN</h2>
+          </div>
+          <span class="section-arrow-indicator" aria-hidden="true">›</span>
+        </div>
+
+        <!-- Bloque 1: PRODUCTO Y COMPRA USA -->
+        <div class="form-block">
+          <div class="block-header">
+            <span class="block-number">1</span>
+            <h3 class="block-title">PRODUCTO Y COMPRA USA</h3>
+          </div>
+          <div class="input-grid">
+            <div class="input-field input-field-full">
+              <label for="producto">Producto / Perfume</label>
+              <div class="input-wrapper">
+                <span class="input-icon">🧴</span>
+                <input id="producto" type="text" placeholder="Ej: Mandarin Sky 100ml" autocomplete="off">
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label for="cantidad">Cantidad (Uds)</label>
+              <div class="input-wrapper">
+                <span class="input-icon">🔢</span>
+                <input id="cantidad" type="number" min="1" step="1" value="1">
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label for="precioUSA">Precio unitario USA ($)</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">$</span>
+                <input id="precioUSA" type="number" min="0" step="0.01" placeholder="33.50">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque 2: FLETE O COSTO DE ENVÍO -->
+        <div class="form-block">
+          <div class="block-header">
+            <span class="block-number">2</span>
+            <h3 class="block-title">FLETE O COSTO DE ENVÍO</h3>
+          </div>
+          <div class="input-grid input-grid-4">
+            <div class="input-field">
+              <label for="peso">Peso perfume (KG)</label>
+              <div class="input-wrapper">
+                <input id="peso" type="number" min="0" step="0.01" value="0.6">
+                <span class="input-suffix">KG</span>
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label for="envioKg">Costo envío / KG ($)</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">$</span>
+                <input id="envioKg" type="number" min="0" step="0.01" value="9.50">
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label for="reempaque">Reempaque total ($)</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">$</span>
+                <input id="reempaque" type="number" min="0" step="0.01" value="1.00">
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label for="tc">Tipo de cambio (S/)</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">S/</span>
+                <input id="tc" type="number" min="0" step="0.01" value="3.40">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque 3: COSTOS EN PERÚ -->
+        <div class="form-block">
+          <div class="block-header">
+            <span class="block-number">3</span>
+            <h3 class="block-title">COSTOS EN PERÚ</h3>
+          </div>
+          <div class="input-grid">
+            <div class="input-field">
+              <label for="extras">Costos extras locales (S/)</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">S/</span>
+                <input id="extras" type="number" min="0" step="0.01" value="15.00">
+              </div>
+              <span class="input-hint">Delivery, caja, decant de regalo</span>
+            </div>
+
+            <div class="input-field">
+              <label for="venta">Precio de venta público (S/)</label>
+              <div class="input-wrapper input-highlight">
+                <span class="input-prefix">S/</span>
+                <input id="venta" type="number" min="0" step="0.01" placeholder="175.00">
+              </div>
+              <span class="input-hint">Precio final ofrecido al cliente</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón Principal: CALCULAR COSTOS (Grande, Ancho Completo) -->
+        <div class="form-actions-wrapper">
+          <button id="btn-calcular" type="button" class="btn btn-calcular-hero">
+            <span class="btn-icon">⚡</span>
+            <span>CALCULAR COSTOS</span>
+          </button>
+
+          <!-- Acciones Secundarias -->
+          <div class="action-buttons-grid">
+            <button id="btn-guardar" type="button" class="btn btn-primary btn-grid-span">
+              <span class="btn-icon">💾</span>
+              <span>GUARDAR COTIZACIÓN</span>
+            </button>
+
+            <button id="btn-nuevo" type="button" class="btn btn-tertiary">
+              <span class="btn-icon">✨</span>
+              <span>NUEVA COTIZACIÓN</span>
+            </button>
+
+            <button id="btn-limpiar" type="button" class="btn btn-tertiary">
+              <span class="btn-icon">🧹</span>
+              <span>LIMPIAR DATOS</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN DE RESULTADOS: Tarjetas Grandes -->
+      <section class="results-container" id="seccion-resultados">
+        <!-- Tarjeta 1: COSTO PUESTO EN PERÚ -->
+        <div class="result-card card-costo">
+          <div class="card-top">
+            <div class="card-badge">Costos Courier</div>
+            <span class="card-icon">🇵🇪</span>
+          </div>
+          <h3 class="card-title">COSTO PUESTO EN PERÚ</h3>
+          <div class="card-product-target">
+            <span class="target-icon">🧴</span>
+            <span class="target-name" id="res-nombre-costo">Perfume no especificado</span>
+          </div>
+
+          <div class="card-validation-alert" id="alert-costo" style="display: none;">
+            ⚠️ Ingresa el precio USA para calcular
+          </div>
+
+          <div class="costo-breakdown" id="box-costo-breakdown">
+            <div class="breakdown-row">
+              <span class="row-label">Total USA:</span>
+              <b class="row-val" id="res-total-usa">$0.00</b>
+            </div>
+            <div class="breakdown-row">
+              <span class="row-label">Flete (Peso total × Envío):</span>
+              <b class="row-val" id="res-flete">$0.00</b>
+            </div>
+            <div class="breakdown-row">
+              <span class="row-label">Reempaque:</span>
+              <b class="row-val" id="res-reempaque">$0.00</b>
+            </div>
+            <div class="breakdown-row breakdown-subtotal">
+              <span class="row-label">Total USD (USA + Envío):</span>
+              <b class="row-val highlight-usd" id="res-total-usd">$0.00</b>
+            </div>
+          </div>
+
+          <div class="costo-hero">
+            <span class="hero-label">Costo puesto en Perú (C/U)</span>
+            <div class="hero-amount-group">
+              <span class="hero-currency">S/</span>
+              <span class="hero-number" id="res-costo-peru">0.00</span>
+            </div>
+            <span class="hero-subtext" id="res-costo-total-soles">Total lote: S/ 0.00</span>
+          </div>
+        </div>
+
+        <!-- Tarjeta 2: GANANCIA -->
+        <div class="result-card card-ganancia">
+          <div class="card-top">
+            <div class="card-badge badge-profit">Rentabilidad Neta</div>
+            <span class="card-icon">📈</span>
+          </div>
+          <h3 class="card-title">GANANCIA</h3>
+          <div class="card-product-target">
+            <span class="target-icon">🧴</span>
+            <span class="target-name" id="res-nombre-ganancia">Perfume no especificado</span>
+          </div>
+
+          <div class="card-validation-alert" id="alert-ganancia" style="display: none;">
+            ℹ️ Ingresa precio de venta para ver tu ganancia
+          </div>
+
+          <div class="ganancia-grid" id="box-ganancia-grid">
+            <div class="ganancia-stat">
+              <span class="stat-label">Ganancia por unidad</span>
+              <div class="stat-value-wrap positive" id="wrap-ganancia-unidad">
+                <span class="stat-curr">S/</span>
+                <b class="stat-val" id="res-ganancia-unidad">0.00</b>
+              </div>
+            </div>
+
+            <div class="ganancia-stat">
+              <span class="stat-label">Ganancia total lote</span>
+              <div class="stat-value-wrap positive" id="wrap-ganancia-total">
+                <span class="stat-curr">S/</span>
+                <b class="stat-val" id="res-ganancia-total">0.00</b>
+              </div>
+            </div>
+          </div>
+
+          <div class="margen-container" id="box-margen-container">
+            <div class="margen-label-row">
+              <span>Margen sobre venta:</span>
+              <b id="res-margen" class="margen-pill">0.0%</b>
+            </div>
+            <div class="margen-progress-bar">
+              <div id="margen-bar-fill" class="margen-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </section>
+      </div><!-- /#vista-cotizador -->
+
+      <!-- VISTA 2: CATÁLOGO (SOLO CONSULTA CONECTADO A GOOGLE SHEETS) -->
+      <div id="vista-catalogo" class="app-view is-hidden">
+        <section class="section-card catalog-section" id="seccion-catalogo">
+          <!-- 1. Título principal centrado con protagonismo -->
+          <h2 class="catalog-main-title">CATÁLOGO DE PERFUMES</h2>
+
+          <!-- 2. Estado del catálogo (información comercial cliente) -->
+          <div class="catalog-commercial-status">
+            <span class="catalog-counter" id="catalogo-contador">Consultando Google Sheets...</span>
+          </div>
+
+          <!-- 3. Barra de sincronización (información secundaria discreta) -->
+          <div class="catalog-sync-wrapper">
+            <div class="catalog-sync-info">
+              <span class="sync-status-dot" id="catalogo-sync-dot"></span>
+              <span class="sync-status-text" id="catalogo-sync-text">Sincronizado</span>
+            </div>
+            <button id="btn-sincronizar-catalogo" type="button" class="btn-catalog-sync" title="Actualizar datos desde Google Sheets" aria-label="Actualizar catálogo">
+              <span class="sync-icon">🔄</span>
+              <span>Actualizar</span>
+            </button>
+          </div>
+
+          <!-- 4. Fila de Buscador y Filtros juntos -->
+          <div class="catalog-search-filter-row">
+            <div class="catalog-search-bar">
+              <span class="catalog-search-icon">🔍</span>
+              <input id="catalogo-busqueda" type="text" placeholder="Buscar perfume, marca o tamaño..." autocomplete="off" aria-label="Buscar perfume en catálogo">
+              <button id="catalogo-btn-limpiar-busqueda" type="button" class="btn-clear-search" style="display: none;" title="Limpiar búsqueda" aria-label="Limpiar búsqueda">✕</button>
+            </div>
+
+            <button type="button" id="btn-toggle-filtros" class="btn-toggle-filters" aria-expanded="false" aria-controls="catalog-filters-collapsible" title="Mostrar u ocultar filtros">
+              <span class="toggle-icon">⚙</span>
+              <span class="toggle-text">Filtros</span>
+              <span class="toggle-arrow" id="toggle-filtros-arrow">▼</span>
+              <span class="toggle-active-dot" id="toggle-filtros-dot" style="display: none;" title="Filtros aplicados"></span>
+            </button>
+          </div>
+
+          <!-- 5. Contador dinámico de resultados (Búsqueda y Filtros) -->
+          <div class="catalog-results-counter-row">
+            <span class="catalog-results-counter" id="catalogo-contador-resultados"></span>
+          </div>
+
+          <!-- Filtros de Categoría, Género y Estado (Desplegable) -->
+          <div class="catalog-filters-container is-collapsed" id="catalog-filters-collapsible">
+            <!-- Filtro de Categoría -->
+            <div class="filter-row">
+              <span class="filter-row-label">Categoría</span>
+              <div class="filter-pills-group" id="filter-group-categoria" role="group" aria-label="Filtro de categoría">
+                <button type="button" class="catalog-filter-btn is-active" data-filter="categoria" data-value="todos">Todos</button>
+                <button type="button" class="catalog-filter-btn" data-filter="categoria" data-value="diseñador">Diseñador</button>
+                <button type="button" class="catalog-filter-btn" data-filter="categoria" data-value="árabes">Árabes</button>
+              </div>
+            </div>
+
+            <!-- Filtro de Género -->
+            <div class="filter-row">
+              <span class="filter-row-label">Género</span>
+              <div class="filter-pills-group" id="filter-group-genero" role="group" aria-label="Filtro de género">
+                <button type="button" class="catalog-filter-btn is-active" data-filter="genero" data-value="todos">Todos</button>
+                <button type="button" class="catalog-filter-btn" data-filter="genero" data-value="hombre">Hombre</button>
+                <button type="button" class="catalog-filter-btn" data-filter="genero" data-value="mujer">Mujer</button>
+              </div>
+            </div>
+
+            <!-- Filtro de Estado -->
+            <div class="filter-row">
+              <span class="filter-row-label">Estado</span>
+              <div class="filter-pills-group" id="filter-group-estado" role="group" aria-label="Filtro de estado">
+                <button type="button" class="catalog-filter-btn is-active" data-filter="estado" data-value="todos">Todos</button>
+                <button type="button" class="catalog-filter-btn" data-filter="estado" data-value="disponibles">Disponibles</button>
+                <button type="button" class="catalog-filter-btn" data-filter="estado" data-value="agotados">Agotados</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contenedor Dinámico de Tarjetas de Perfumes (Solo Lectura) -->
+          <div id="catalogo-lista" class="catalogo-cards-grid">
+            <!-- Inyectado por app.js -->
+          </div>
+
+          <!-- Estado Vacío (Búsqueda sin resultados) -->
+          <div id="catalogo-empty" class="catalog-empty-state" style="display: none;">
+            <div class="empty-icon">🧴</div>
+            <p class="empty-title" id="catalogo-empty-title">No se encontraron perfumes</p>
+            <p class="empty-desc" id="catalogo-empty-desc">Intenta buscando por marca como "Dior", "Afnan", "Armaf" o "Chanel".</p>
+          </div>
+        </section>
+      </div><!-- /#vista-catalogo -->
+
+      <!-- VISTA 3: COTIZACIONES GUARDADAS -->
+      <div id="vista-cotizaciones" class="app-view is-hidden">
+        <!-- SECCIÓN HISTORIAL: COTIZACIONES GUARDADAS -->
+        <section class="section-card history-section" id="seccion-historial">
+          <div class="section-header">
+            <div class="section-title-wrapper">
+              <span class="section-icon">📋</span>
+              <h2 class="section-title">COTIZACIONES GUARDADAS</h2>
+            </div>
+            <span class="history-counter" id="historial-contador">0 guardadas</span>
+          </div>
+
+          <!-- Lista de Tarjetas de Historial -->
+          <div id="historial-lista" class="historial-cards-grid">
+            <!-- Se inyecta dinámicamente con app.js -->
+          </div>
+
+          <!-- Botón de Borrado de Historial -->
+          <div class="history-actions" id="historial-actions" style="display: none;">
+            <button id="btn-borrar-historial" type="button" class="btn btn-danger">
+              <span class="btn-icon">🗑️</span>
+              <span>Borrar todo el historial</span>
+            </button>
+          </div>
+        </section>
+      </div><!-- /#vista-cotizaciones -->
+    </main>
+
+    <!-- Footer Discreto -->
+    <footer class="app-footer">
+      <p>DUNES PARFUMS &copy; 2026 &bull; Importación Courier USA ✈️ Perú</p>
+    </footer>
+  </div>
+
+  <!-- MODAL DE DETALLE COMPLETO DE COTIZACIÓN -->
+  <div id="modal-detalle" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-tag">Desglose Detallado</span>
+          <h3 id="modal-producto" class="modal-title">Dior Sauvage</h3>
+          <span id="modal-fecha" class="modal-date">05/09/2026 01:30</span>
+        </div>
+        <button id="btn-cerrar-modal" class="modal-close-btn" aria-label="Cerrar modal">&times;</button>
+      </div>
+
+      <div class="modal-body" id="modal-contenido">
+        <!-- Generado dinámicamente -->
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-cargar-modal" class="btn btn-secondary">
+          <span>Editar en Cotizador</span>
+        </button>
+        <button id="btn-cerrar-modal-bottom" class="btn btn-tertiary">
+          <span>Cerrar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIGURACIÓN DE COSTOS BASE -->
+  <div id="modal-configuracion" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-tag">Valores Predeterminados</span>
+          <h3 class="modal-title">⚙️ Configuración de Costos</h3>
+          <span class="modal-date">Valores base para nuevas cotizaciones</span>
+        </div>
+        <button id="btn-cerrar-config" class="modal-close-btn" aria-label="Cerrar configuración">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="config-modal-desc">Define las tarifas base de courier y aduanas. Recuerda que la app también recuerda automáticamente los últimos cambios que realizas al cotizar.</p>
+
+        <div class="input-grid input-grid-4">
+          <div class="input-field">
+            <label for="cfg-peso">Peso base (KG)</label>
+            <div class="input-wrapper">
+              <input id="cfg-peso" type="number" min="0" step="0.01" value="0.6">
+              <span class="input-suffix">KG</span>
+            </div>
+          </div>
+
+          <div class="input-field">
+            <label for="cfg-envioKg">Envío base / KG ($)</label>
+            <div class="input-wrapper">
+              <span class="input-prefix">$</span>
+              <input id="cfg-envioKg" type="number" min="0" step="0.01" value="9.50">
+            </div>
+          </div>
+
+          <div class="input-field">
+            <label for="cfg-costoCaja">Precio reempaque caja (4 unidades) ($)</label>
+            <div class="input-wrapper">
+              <span class="input-prefix">$</span>
+              <input id="cfg-costoCaja" type="number" min="0" step="0.01" value="4.00">
+            </div>
+          </div>
+
+          <div class="input-field">
+            <label for="cfg-reempaque">Costo equivalente por perfume ($)</label>
+            <div class="input-wrapper">
+              <span class="input-prefix">$</span>
+              <input id="cfg-reempaque" type="number" min="0" step="0.01" value="1.00" readonly style="opacity: 0.85; background: rgba(255,255,255,0.03); cursor: default;">
+            </div>
+            <span class="input-hint">Automático: Precio caja ÷ 4</span>
+          </div>
+
+          <div class="input-field">
+            <label for="cfg-tc">T.C. base (S/)</label>
+            <div class="input-wrapper">
+              <span class="input-prefix">S/</span>
+              <input id="cfg-tc" type="number" min="0" step="0.01" value="3.40">
+            </div>
+          </div>
+
+          <div class="input-field">
+            <label for="cfg-extras">Costos extras base locales (S/)</label>
+            <div class="input-wrapper">
+              <span class="input-prefix">S/</span>
+              <input id="cfg-extras" type="number" min="0" step="0.01" value="15.00">
+            </div>
+            <span class="input-hint">Delivery, caja o bolsa</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="btn-guardar-config" class="btn btn-secondary">
+          <span>💾 Guardar como Base</span>
+        </button>
+        <button type="button" id="btn-restaurar-fabrica" class="btn btn-tertiary">
+          <span>🔄 Restaurar Fábrica</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor flotante de Avisos Toast -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="./js/calculator.js"></script>
+  <script src="./app.js?v=2.4"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Dependencias
+node_modules/
+
+# Entorno y variables secretas
+.env
+.env.local
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos de caché del IDE y temporales
+.idea/
+.vscode/
+*.log
