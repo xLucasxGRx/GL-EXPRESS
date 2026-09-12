@@ -934,8 +934,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const tieneImagen = item.imagen && (item.imagen.startsWith('http://') || item.imagen.startsWith('https://'));
       const cantActual = localCardQuantities[item.id] || 1;
+      const nombreLimpio = item.producto ? item.producto.replace(/\s*\((?:AGOTADO|Agotado|NO DISPONIBLE|No disponible)\)\s*/gi, '').trim() : '';
 
       card.innerHTML = `
+        ${item.esAgotado ? `
+          <!-- Banner Superior Grande de Agotado -->
+          <div class="card-agotado-banner">
+            <span class="agotado-banner-icon">🚫</span>
+            <span class="agotado-banner-text">AGOTADO</span>
+          </div>
+        ` : ''}
+
         <!-- Imagen Centrada -->
         <div class="wholesale-img-wrapper">
           ${tieneImagen ? `
@@ -943,18 +952,15 @@ document.addEventListener('DOMContentLoaded', () => {
               <span class="card-thumb-shimmer"></span>
               <span class="card-thumb-fallback-icon">🧴</span>
             </div>
-            <img data-src="${escapeHTML(item.imagen)}" alt="${escapeHTML(item.producto)}" class="wholesale-img" onerror="this.style.display='none'; if(this.previousElementSibling) this.previousElementSibling.classList.add('is-failed');">
+            <img data-src="${escapeHTML(item.imagen)}" alt="${escapeHTML(nombreLimpio)}" class="wholesale-img" onerror="this.style.display='none'; if(this.previousElementSibling) this.previousElementSibling.classList.add('is-failed');">
           ` : `
             <span class="card-thumb-fallback-icon" style="opacity: 0.65; font-size: 2.2rem;">🧴</span>
           `}
         </div>
 
-        <!-- Título del Perfume -->
+        <!-- Título del Perfume (Limpio, sin depender de texto entre paréntesis) -->
         <div class="wholesale-title-wrapper">
-          <h3 class="wholesale-title">
-            ${escapeHTML(item.producto)}
-            ${item.esAgotado ? '<span class="card-agotado-badge">(AGOTADO)</span>' : ''}
-          </h3>
+          <h3 class="wholesale-title">${escapeHTML(nombreLimpio)}</h3>
         </div>
 
         <!-- Bloque de Precio Mayorista (Únicamente PUESTO EN PERÚ) -->
@@ -965,16 +971,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         <!-- Fila de Acciones: Selector de Cantidad [-] 1 [+] y Botón Agregar -->
         <div class="wholesale-actions-row">
-          <div class="wholesale-stepper">
-            <button type="button" class="stepper-btn btn-card-minus" data-id="${item.id}" aria-label="Disminuir cantidad">-</button>
+          <div class="wholesale-stepper ${item.esAgotado ? 'is-disabled' : ''}">
+            <button type="button" class="stepper-btn btn-card-minus" data-id="${item.id}" aria-label="Disminuir cantidad" ${item.esAgotado ? 'disabled tabindex="-1"' : ''}>-</button>
             <span class="stepper-val" id="stepper-val-${item.id}">${cantActual}</span>
-            <button type="button" class="stepper-btn btn-card-plus" data-id="${item.id}" aria-label="Aumentar cantidad">+</button>
+            <button type="button" class="stepper-btn btn-card-plus" data-id="${item.id}" aria-label="Aumentar cantidad" ${item.esAgotado ? 'disabled tabindex="-1"' : ''}>+</button>
           </div>
 
-          <button type="button" class="btn-add-wholesale btn-card-add" data-id="${item.id}" aria-label="Agregar al pedido">
-            <span class="btn-add-short">🛒 Agregar</span>
-            <span class="btn-add-full">🛒 Agregar al pedido</span>
-          </button>
+          ${item.esAgotado ? `
+            <button type="button" class="btn-add-wholesale btn-card-agotado is-disabled" disabled tabindex="-1" aria-label="Producto agotado">
+              <span class="btn-add-short">🚫 AGOTADO</span>
+              <span class="btn-add-full">🚫 AGOTADO</span>
+            </button>
+          ` : `
+            <button type="button" class="btn-add-wholesale btn-card-add" data-id="${item.id}" aria-label="Agregar al pedido">
+              <span class="btn-add-short">🛒 Agregar</span>
+              <span class="btn-add-full">🛒 Agregar al pedido</span>
+            </button>
+          `}
         </div>
       `;
 
