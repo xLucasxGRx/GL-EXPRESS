@@ -5,10 +5,10 @@
  * 
  * Reglas de Negocio:
  * 1. Lee únicamente la pestaña MAYORISTA (gid=2013926010).
- * 2. Datos visibles: Imagen, Producto, Precio USA ($), PUESTO EN PERÚ (S/).
+ * 2. Datos visibles: Imagen, Producto, PUESTO EN PERÚ (S/). (Precio USA oculto al cliente mayorista).
  * 3. Columna J ("Costo Perú") se muestra estrictamente como "PUESTO EN PERÚ".
- * 4. Oculta al cliente: Cantidad, Peso KG, Flete, Reempaque, TC, Ganancias.
- * 5. Carrito como generador de pedido estructurado para WhatsApp.
+ * 4. Oculta al cliente: Precio USA ($), Cantidad, Peso KG, Flete, Reempaque, TC, Ganancias.
+ * 5. Carrito a pantalla completa (95vh) como generador de pedido mayorista (mínimo 6 unidades).
  * ==========================================================================
  */
 
