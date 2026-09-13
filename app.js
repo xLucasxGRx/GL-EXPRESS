@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Reglas de negocio y configuración mayorista
   const MIN_UNIDADES_MAYORISTA = 6;
-  const WHATSAPP_NUMERO = '51962247719';
+  const WHATSAPP_NUMERO = '51910487554';
 
   // Estado en memoria
   let catalogoProductos = [];

@@ -31,7 +31,7 @@ assert.ok(styleCss.includes('is-item-agotado'), 'style.css debe incluir estilos 
 assert.ok(appJs.includes('MIN_UNIDADES_MAYORISTA'), 'app.js debe definir la constante MIN_UNIDADES_MAYORISTA');
 assert.ok(appJs.includes('validarProductosDisponibles'), 'app.js debe implementar validarProductosDisponibles()');
 assert.ok(appJs.includes('ACTUALIZA TU PEDIDO'), 'app.js debe incluir el estado ACTUALIZA TU PEDIDO');
-assert.ok(appJs.includes('51962247719'), 'app.js debe apuntar al número oficial de WhatsApp 51962247719');
+assert.ok(appJs.includes('51910487554'), 'app.js debe apuntar al número oficial de WhatsApp 51910487554');
 assert.ok(!appJs.includes('<span class="wholesale-price-lbl">USA</span>'), 'app.js no debe renderizar la etiqueta USA en la tarjeta');
 assert.ok(!appJs.includes('wholesale-price-usa'), 'app.js no debe incluir la clase wholesale-price-usa en la tarjeta');
 console.log('✔ index.html y app.js validados: Limpio de vistas minoristas, regla de 6 unidades, confirmación de vaciado y validación de stock activa.');
